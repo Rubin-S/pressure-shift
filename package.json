@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "concurrently -n \"server,client\" -c \"blue,green\" \"npm run dev -w @pressure-shift/server\" \"npm run dev -w @pressure-shift/client\"",
     "build": "npm run build -w @pressure-shift/shared && npm run build -w @pressure-shift/server && npm run build -w @pressure-shift/client",
+    "start": "node apps/server/dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

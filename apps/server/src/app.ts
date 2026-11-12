@@ -1,7 +1,13 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { Server } from 'socket.io';
 import cors from 'cors';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import {
   PROTOCOL_VERSION,
   ClientToServerEvents,
@@ -58,6 +64,18 @@ export function createServerApp(): ServerInstance {
 
   // Register Socket.IO Handlers
   registerSocketHandlers(io, roomManager, rateLimiter);
+
+  // Serve static client build if present (Unified Single-Service Deployment for Render/Railway/Fly.io/Docker)
+  const clientDist = path.resolve(__dirname, '../../client/dist');
+  if (fs.existsSync(clientDist)) {
+    app.use(express.static(clientDist));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/socket.io') || req.path.startsWith('/health')) {
+        return next();
+      }
+      res.sendFile(path.join(clientDist, 'index.html'));
+    });
+  }
 
   const close = async (): Promise<void> => {
     rateLimiter.destroy();
