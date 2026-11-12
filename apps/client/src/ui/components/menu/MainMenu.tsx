@@ -318,6 +318,29 @@ export const MainMenu: React.FC = () => {
               </button>
             </div>
 
+            {/* Mission Lore Dossier */}
+            <div
+              style={{
+                backgroundColor: 'rgba(5, 20, 38, 0.9)',
+                border: '1px solid rgba(0, 243, 255, 0.4)',
+                padding: '14px',
+                borderRadius: '4px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.82rem',
+                lineHeight: '1.6',
+                color: '#b0d5ea',
+              }}
+            >
+              <div style={{ color: 'var(--accent-cyan)', fontWeight: 700, marginBottom: '6px' }}>
+                MISSION DOSSIER: HADAL COMPLEX NADIR-7
+              </div>
+              <div>
+                <strong>LOCATION:</strong> Challenger Deep Trench (8,540m depth | 85 MPa hydrostatic pressure).<br />
+                <strong>THE ANOMALY:</strong> Deep core drilling awakened a self-resonating piezoelectric crystal. Its 4.17 Hz acoustic pulse induces acute paranoia and cognitive dissociation.<br />
+                <strong>THE THREAT:</strong> Corporate saboteurs have infiltrated the habitat. Their directive: sever life support, trigger catastrophic decompression, and bury Nadir-7 in the trench forever.
+              </div>
+            </div>
+
             {/* Operator Briefing */}
             <div
               style={{
