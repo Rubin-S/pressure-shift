@@ -1,31 +1,21 @@
-import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
-import cors from 'cors';
 import { PROTOCOL_VERSION } from '@pressure-shift/shared';
+import { createServerApp } from './app.js';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = Number(process.env.PORT) || 3001;
+const instance = createServerApp();
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+instance.httpServer.listen(PORT, () => {
+  console.log(`[PRESSURE SHIFT SERVER] Authoritative game server listening on port ${PORT} (Protocol v${PROTOCOL_VERSION})`);
 });
 
-const PORT = process.env.PORT || 3001;
+// Graceful shutdown handling
+const shutdown = async () => {
+  console.log('[PRESSURE SHIFT SERVER] Shutting down...');
+  await instance.close();
+  process.exit(0);
+};
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', protocol: PROTOCOL_VERSION });
-});
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
-io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
-});
-
-server.listen(PORT, () => {
-  console.log(`[PRESSURE SHIFT SERVER] running on port ${PORT} (Protocol v${PROTOCOL_VERSION})`);
-});
+export { createServerApp };

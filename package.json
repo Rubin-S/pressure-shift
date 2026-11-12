@@ -16,6 +16,7 @@
     "lint": "tsc --noEmit -p packages/shared && tsc --noEmit -p apps/server && tsc --noEmit -p apps/client"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "concurrently": "^9.1.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"

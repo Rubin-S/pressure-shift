@@ -1,0 +1,269 @@
+/* ==========================================================================
+   PRESSURE SHIFT: Retro-Futuristic Deep Ocean Submersible UI Theme
+   ========================================================================== */
+
+:root {
+  --bg-deep-abyss: #03070d;
+  --bg-hull-dark: #07111e;
+  --bg-panel: rgba(10, 25, 42, 0.88);
+  --bg-panel-light: rgba(16, 38, 64, 0.92);
+  --border-sub: #173656;
+  --border-glow: #00f3ff;
+  --accent-cyan: #00f3ff;
+  --accent-cyan-dim: #0099aa;
+  --accent-red: #ff3864;
+  --accent-amber: #ffaa00;
+  --accent-green: #00e676;
+  --accent-purple: #bf55ec;
+  --text-primary: #e2f1f8;
+  --text-muted: #7e9bb0;
+  --text-dim: #446077;
+  --font-header: 'Orbitron', monospace, sans-serif;
+  --font-body: 'Chakra Petch', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+
+/* CRT Scanline & Phosphor Overlay */
+.crt-overlay {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.35) 50%
+  ),
+  radial-gradient(circle at center, transparent 65%, rgba(0, 10, 20, 0.6) 100%);
+  background-size: 100% 4px, 100% 100%;
+  box-shadow: inset 0 0 80px rgba(0, 15, 30, 0.7);
+  animation: crtFlicker 0.15s infinite;
+}
+
+@keyframes crtFlicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1.0; }
+  100% { opacity: 0.98; }
+}
+
+/* Sonar radar pulse animation */
+@keyframes sonarPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Alarm siren flash */
+@keyframes alarmFlash {
+  0%, 100% {
+    background-color: rgba(255, 56, 100, 0.15);
+    border-color: rgba(255, 56, 100, 0.8);
+  }
+  50% {
+    background-color: rgba(255, 56, 100, 0.35);
+    border-color: #ff3864;
+    box-shadow: 0 0 25px rgba(255, 56, 100, 0.6);
+  }
+}
+
+/* Underwater ambient drift */
+@keyframes bubbleFloat {
+  0% {
+    transform: translateY(100vh) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-20vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Beveled Submersible Frame */
+.sub-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-sub);
+  box-shadow: 
+    inset 0 0 15px rgba(0, 243, 255, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 1px var(--border-glow);
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+.sub-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--accent-cyan);
+  border-left: 2px solid var(--accent-cyan);
+}
+
+.sub-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid var(--accent-cyan);
+  border-right: 2px solid var(--accent-cyan);
+}
+
+/* Glow Utilities */
+.glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.6), 0 0 20px rgba(0, 243, 255, 0.3);
+}
+
+.glow-red {
+  text-shadow: 0 0 10px rgba(255, 56, 100, 0.8), 0 0 20px rgba(255, 56, 100, 0.4);
+}
+
+.glow-amber {
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.7);
+}
+
+/* Pixel / Terminal Buttons */
+.btn-sub {
+  font-family: var(--font-header);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #10263f 0%, #0a192a 100%);
+  border: 1px solid var(--accent-cyan-dim);
+  color: var(--accent-cyan);
+  cursor: pointer;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  position: relative;
+  transition: all 0.15s ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-sub:hover:not(:disabled) {
+  background: linear-gradient(180deg, #16365a 0%, #0f243b 100%);
+  border-color: var(--accent-cyan);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-sub:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.3);
+}
+
+.btn-sub:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.btn-danger {
+  border-color: #aa1e3d;
+  color: #ff3864;
+  background: linear-gradient(180deg, #3d0e1b 0%, #20070e 100%);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #5c1428 0%, #350b17 100%);
+  border-color: #ff3864;
+  color: #fff;
+  box-shadow: 0 0 18px rgba(255, 56, 100, 0.6);
+}
+
+.btn-warning {
+  border-color: #b37700;
+  color: #ffaa00;
+  background: linear-gradient(180deg, #3d2807 0%, #221603 100%);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: linear-gradient(180deg, #593b0b 0%, #302005 100%);
+  border-color: #ffaa00;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+}
+
+.btn-success {
+  border-color: #00994f;
+  color: #00e676;
+  background: linear-gradient(180deg, #093318 0%, #04190c 100%);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: linear-gradient(180deg, #114e26 0%, #072a14 100%);
+  border-color: #00e676;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(0, 230, 118, 0.5);
+}
+
+/* Custom Input */
+.input-sub {
+  font-family: var(--font-mono);
+  background: rgba(5, 14, 25, 0.85);
+  border: 1px solid var(--border-sub);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  outline: none;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.input-sub:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.25);
+  background: rgba(7, 20, 36, 0.95);
+}
+
+/* HUD Glass Meter */
+.progress-rail {
+  width: 100%;
+  height: 18px;
+  background: rgba(4, 10, 18, 0.85);
+  border: 1px solid var(--border-sub);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0099aa 0%, #00f3ff 100%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+}
