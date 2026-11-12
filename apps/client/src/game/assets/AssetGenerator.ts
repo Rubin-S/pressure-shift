@@ -1011,7 +1011,16 @@ export class AssetGenerator {
       }
     }
 
-    scene.textures.addCanvas('player_diver_sheet', c);
+    const texture = scene.textures.addCanvas('player_diver_sheet', c);
+    if (texture) {
+      let frameIndex = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let f = 0; f < cols; f++) {
+          texture.add(frameIndex, 0, f * fw, r * fh, fw, fh);
+          frameIndex++;
+        }
+      }
+    }
   }
 
   private static drawDiverFrame(
@@ -1197,7 +1206,12 @@ export class AssetGenerator {
       ctx.fillRect(cx + 2, cy - 8, 3, 3);
     }
 
-    scene.textures.addCanvas('player_ghost_sheet', c);
+    const texture = scene.textures.addCanvas('player_ghost_sheet', c);
+    if (texture) {
+      for (let f = 0; f < cols; f++) {
+        texture.add(f, 0, f * fw, 0, fw, fh);
+      }
+    }
   }
 
   /**
@@ -1338,7 +1352,12 @@ export class AssetGenerator {
     ctx.lineTo(224 + 14, 23);
     ctx.stroke();
 
-    scene.textures.addCanvas('cosmetics_sheet', c);
+    const texture = scene.textures.addCanvas('cosmetics_sheet', c);
+    if (texture) {
+      for (let i = 0; i < 8; i++) {
+        texture.add(i, 0, i * 32, 0, 32, 32);
+      }
+    }
   }
 
   /**

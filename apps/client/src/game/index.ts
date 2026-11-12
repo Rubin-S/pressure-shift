@@ -3,8 +3,14 @@ import { createGameConfig } from './config/PhaserConfig.js';
 import { gameBridge, GameBridge } from './GameBridge.js';
 
 export function createPressureShiftGame(container: HTMLElement | string): Phaser.Game {
-  const config = createGameConfig(container);
-  return new Phaser.Game(config);
+  try {
+    const config = createGameConfig(container, Phaser.AUTO);
+    return new Phaser.Game(config);
+  } catch (err) {
+    console.warn('[Phaser] WebGL init failed, falling back to Canvas renderer:', err);
+    const fallbackConfig = createGameConfig(container, Phaser.CANVAS);
+    return new Phaser.Game(fallbackConfig);
+  }
 }
 
 export { gameBridge, GameBridge };

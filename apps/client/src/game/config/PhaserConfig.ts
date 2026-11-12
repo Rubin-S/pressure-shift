@@ -2,12 +2,18 @@ import Phaser from 'phaser';
 import { BootScene } from '../scenes/BootScene.js';
 import { FacilityScene } from '../scenes/FacilityScene.js';
 
-export function createGameConfig(container: HTMLElement | string): Phaser.Types.Core.GameConfig {
+export function createGameConfig(
+  container: HTMLElement | string,
+  renderType: number = Phaser.AUTO
+): Phaser.Types.Core.GameConfig {
+  const w = typeof window !== 'undefined' ? window.innerWidth || 1280 : 1280;
+  const h = typeof window !== 'undefined' ? window.innerHeight || 720 : 720;
+
   return {
-    type: Phaser.AUTO,
+    type: renderType,
     parent: container,
-    width: '100%',
-    height: '100%',
+    width: w,
+    height: h,
     scale: {
       mode: Phaser.Scale.RESIZE,
       autoCenter: Phaser.Scale.CENTER_BOTH,

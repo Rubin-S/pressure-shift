@@ -119,6 +119,16 @@ export const PhaserCanvas: React.FC = () => {
     const isModalOpen = !!activeTaskModal || !!activeSabotageRepairModal;
     const isPlaying = roomState === 'PLAYING';
     gameBridge.setMovementEnabled(!isModalOpen && isPlaying);
+
+    if (isPlaying && gameRef.current) {
+      // Ensure canvas viewport matches browser window immediately on match start
+      try {
+        gameRef.current.scale.resize(window.innerWidth, window.innerHeight);
+        gameRef.current.scale.refresh();
+      } catch {
+        // Ignore scale errors if already sizing
+      }
+    }
   }, [
     players,
     localPlayerId,
@@ -143,7 +153,9 @@ export const PhaserCanvas: React.FC = () => {
         zIndex: 1,
         overflow: 'hidden',
         pointerEvents: roomState === 'PLAYING' ? 'auto' : 'none',
-        display: roomState === 'PLAYING' ? 'block' : 'none',
+        visibility: roomState === 'PLAYING' ? 'visible' : 'hidden',
+        opacity: roomState === 'PLAYING' ? 1 : 0,
+        transition: 'opacity 0.2s ease-in',
       }}
     />
   );
