@@ -141,7 +141,7 @@ export const VirtualJoystick: React.FC = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 30px 20px 30px',
+        padding: '0 max(24px, env(safe-area-inset-right, 24px)) max(18px, env(safe-area-inset-bottom, 18px)) max(24px, env(safe-area-inset-left, 24px))',
       }}
     >
       {/* Left Virtual Joystick Area */}

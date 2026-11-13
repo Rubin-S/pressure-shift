@@ -18,6 +18,7 @@ export interface RoomBoundingBox {
 
 export interface FacilityRoomInfo {
   id: FacilityRoomId;
+  sectorCode?: string;
   name: string;
   description: string;
   bounds: RoomBoundingBox;

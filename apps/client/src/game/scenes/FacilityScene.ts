@@ -283,24 +283,12 @@ export class FacilityScene extends Phaser.Scene {
   // ----------------------------------------------------
 
   private createRoomLabels(): void {
-    const roomSectorLabels: Record<string, { sector: string; telemetry: string }> = {
-      central_junction: { sector: 'SEC-01 // CENTRAL DISPATCH', telemetry: 'STATION HUB // 1.0 ATM' },
-      docking_cradle: { sector: 'SEC-02 // DOCKING CRADLE', telemetry: 'SUBMERSIBLE AIRLOCK // DECK-A' },
-      sonar_control: { sector: 'SEC-03 // SONAR TELEMETRY', telemetry: 'HYDROPHONE ARRAY // 440 HZ' },
-      hydroponics: { sector: 'SEC-04 // HYDROPONICS LAB', telemetry: 'SPIRULINA CULTURE // O2 GEN' },
-      pressure_lab: { sector: 'SEC-05 // PRESSURE LAB', telemetry: 'EQUALIZATION CHAMBER // 80 PSI' },
-      observation_gallery: { sector: 'SEC-06 // OBSERVATION DOME', telemetry: 'TRENCH VIEWPORT // -8,420M' },
-      thermal_plant: { sector: 'SEC-07 // GEOTHERMAL PLANT', telemetry: 'CORE TURBINE // 480°C' },
-      communications: { sector: 'SEC-08 // COMMUNICATIONS', telemetry: 'ULF TRANSCEIVER // BUOY-7' },
-      medical_bay: { sector: 'SEC-09 // MEDICAL BAY', telemetry: 'BIO-DECONTAM // STASIS PODS' },
-    };
-
-    for (const [roomId, room] of Object.entries(FACILITY_ROOMS)) {
+    for (const [, room] of Object.entries(FACILITY_ROOMS)) {
       const { x, y, width } = room.bounds;
-      const meta = roomSectorLabels[roomId];
+      const sectorTag = room.sectorCode ? `${room.sectorCode} // ${room.name.toUpperCase()}` : room.name.toUpperCase();
 
       // Clean futuristic sector title
-      const title = this.add.text(x + width / 2, y + 26, meta ? meta.sector : room.name.toUpperCase(), {
+      const title = this.add.text(x + width / 2, y + 26, sectorTag, {
         fontFamily: 'monospace',
         fontSize: '13px',
         color: '#00f3ff',
@@ -309,63 +297,69 @@ export class FacilityScene extends Phaser.Scene {
         align: 'center',
       });
       title.setOrigin(0.5, 0.5);
-      title.setAlpha(0.7);
+      title.setAlpha(0.75);
       title.setDepth(-40);
 
-      // Sub-label telemetry
-      if (meta) {
-        const sub = this.add.text(x + width / 2, y + 42, meta.telemetry, {
-          fontFamily: 'monospace',
-          fontSize: '9px',
-          color: '#5b82a6',
-          align: 'center',
-        });
-        sub.setOrigin(0.5, 0.5);
-        sub.setAlpha(0.65);
-        sub.setDepth(-40);
-      }
+      // Sub-label telemetry from room description
+      const sub = this.add.text(x + width / 2, y + 42, room.description.toUpperCase().slice(0, 48), {
+        fontFamily: 'monospace',
+        fontSize: '8px',
+        color: '#5b82a6',
+        align: 'center',
+      });
+      sub.setOrigin(0.5, 0.5);
+      sub.setAlpha(0.65);
+      sub.setDepth(-40);
     }
   }
 
   // ----------------------------------------------------
-  // Distinct Sector Decorative Props & Viewports
+  // Distinct Sector Decorative Props & Centerpieces
   // ----------------------------------------------------
 
   private createDecorativeProps(): void {
-    // 1. Panoramic deep ocean viewports in Observation Gallery
+    // 1. SEC-06 Observation Dome: Massive Panoramic Trench Viewport
     const obs = FACILITY_ROOMS.observation_gallery.bounds;
-    this.add.image(obs.x + obs.width / 2, obs.y + 40, 'viewport_window').setDepth(12);
+    this.add.image(obs.x + obs.width / 2, obs.y + 40, 'viewport_window_panoramic').setDepth(12);
 
-    // 2. Viewport in Sonar Control
+    // 2. SEC-02 Sonar Telemetry: Viewport & Server Blade Racks
     const sonar = FACILITY_ROOMS.sonar_control.bounds;
     this.add.image(sonar.x + sonar.width / 2, sonar.y + 40, 'viewport_window').setDepth(12);
-    // Server blade racks in Sonar Control
     this.add.image(sonar.x + 80, sonar.y + 120, 'prop_server_rack').setDepth(5);
 
-    // 3. Docking Cradle clamp & gantry
+    // 3. SEC-01 Submersible Docking Bay: Circular Moon Pool & Docking Clamps
     const dock = FACILITY_ROOMS.docking_cradle.bounds;
-    this.add.image(dock.x + 120, dock.y + 140, 'prop_docking_clamp').setDepth(5);
-    this.add.image(dock.x + dock.width - 120, dock.y + 140, 'prop_docking_clamp').setDepth(5);
+    this.add.image(dock.x + dock.width / 2, dock.y + 190, 'prop_moon_pool').setDepth(-45);
+    this.add.image(dock.x + 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
+    this.add.image(dock.x + dock.width - 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
 
-    // 4. Bioluminescent Spirulina Algae columns in Hydroponics
+    // 4. SEC-04 Hydrostatic Testing Rig: Vitreous Electrum Anomaly Levitation Pedestal
+    const pressure = FACILITY_ROOMS.pressure_lab.bounds;
+    this.add.image(pressure.x + pressure.width / 2, pressure.y + 180, 'prop_anomaly_pedestal').setDepth(5);
+
+    // 5. SEC-05 Geothermal Vent Generator: Magma Rift & Catwalk
+    const thermal = FACILITY_ROOMS.thermal_plant.bounds;
+    this.add.image(thermal.x + thermal.width / 2, thermal.y + 190, 'prop_magma_rift').setDepth(-45);
+
+    // 6. SEC-03 Hadal Bio-Dome Lab: Vertical Spirulina Photobioreactors
     const hydro = FACILITY_ROOMS.hydroponics.bounds;
-    this.add.image(hydro.x + 80, hydro.y + 130, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 160, hydro.y + 130, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 340, hydro.y + 130, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 420, hydro.y + 130, 'prop_algae_vat').setDepth(5);
+    this.add.image(hydro.x + 80, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+    this.add.image(hydro.x + 160, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+    this.add.image(hydro.x + 340, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+    this.add.image(hydro.x + 420, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
 
-    // 5. Server Blade racks in Communications
+    // 7. SEC-07 Trans-Oceanic Relay: Server Blade Cabinets
     const comms = FACILITY_ROOMS.communications.bounds;
     this.add.image(comms.x + 100, comms.y + 130, 'prop_server_rack').setDepth(5);
     this.add.image(comms.x + 400, comms.y + 130, 'prop_server_rack').setDepth(5);
 
-    // 6. Medical beds in Medical Bay
+    // 8. SEC-08 Hyperbaric Cryo-Lab: Diagnostic Pods
     const med = FACILITY_ROOMS.medical_bay.bounds;
     this.add.image(med.x + 100, med.y + 130, 'prop_med_bed').setDepth(5);
     this.add.image(med.x + 250, med.y + 130, 'prop_med_bed').setDepth(5);
     this.add.image(med.x + 400, med.y + 130, 'prop_med_bed').setDepth(5);
 
-    // 7. Emergency Siren Beacons on Bulkheads
+    // 9. Emergency Siren Beacons on Bulkheads
     for (const [, room] of Object.entries(FACILITY_ROOMS)) {
       this.add.image(room.bounds.x + 30, room.bounds.y + 30, 'prop_siren_beacon').setDepth(15);
       this.add.image(room.bounds.x + room.bounds.width - 30, room.bounds.y + 30, 'prop_siren_beacon').setDepth(15);

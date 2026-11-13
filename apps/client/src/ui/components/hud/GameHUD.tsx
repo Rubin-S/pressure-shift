@@ -93,11 +93,7 @@ export const GameHUD: React.FC = () => {
     }
   };
 
-  const maxKillCd = roomSettings.killCooldown || 25;
-  const killCdPercent = Math.max(0, Math.min(1, killCooldown / maxKillCd));
-
-  const maxSabotageCd = 30;
-  const sabotageCdPercent = Math.max(0, Math.min(1, sabotageCooldown / maxSabotageCd));
+  const completedCount = assignedTasks.filter((t) => t.status === 'COMPLETED').length;
 
   return (
     <div
@@ -118,13 +114,13 @@ export const GameHUD: React.FC = () => {
       <div
         style={{
           position: 'absolute',
-          top: '14px',
-          left: '24px',
-          right: '24px',
+          top: 'env(safe-area-inset-top, 10px)',
+          left: 'max(14px, env(safe-area-inset-left, 14px))',
+          right: 'max(14px, env(safe-area-inset-right, 14px))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '20px',
+          gap: 'clamp(8px, 1.5vw, 18px)',
           pointerEvents: 'auto',
         }}
       >
@@ -132,11 +128,11 @@ export const GameHUD: React.FC = () => {
         <div
           className="sub-panel"
           style={{
-            width: '320px',
-            padding: '10px 16px',
+            width: 'clamp(180px, 24vw, 300px)',
+            padding: '8px 12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px',
+            gap: '4px',
           }}
         >
           <div
@@ -145,18 +141,18 @@ export const GameHUD: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               fontFamily: 'var(--font-mono)',
-              fontSize: '0.75rem',
+              fontSize: 'clamp(0.65rem, 1vw, 0.75rem)',
             }}
           >
-            <span style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
-              STATION OBJECTIVE METER
+            <span style={{ color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
+              STATION PROGRESS
             </span>
             <span style={{ color: '#00e676', fontWeight: 700 }}>
               {Math.round(taskMeter.progressPercent)}%
             </span>
           </div>
 
-          <div className="progress-rail" style={{ height: '8px' }}>
+          <div className="progress-rail" style={{ height: '7px' }}>
             <div
               className="progress-fill"
               style={{
@@ -171,7 +167,7 @@ export const GameHUD: React.FC = () => {
         <div
           className="sub-panel"
           style={{
-            padding: '8px 24px',
+            padding: '6px clamp(12px, 2vw, 22px)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -182,42 +178,42 @@ export const GameHUD: React.FC = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               fontFamily: 'var(--font-header)',
-              fontSize: '0.92rem',
+              fontSize: 'clamp(0.78rem, 1.3vw, 0.92rem)',
               color: '#ffffff',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               textTransform: 'uppercase',
             }}
           >
-            <Compass size={15} color="var(--accent-cyan)" />
+            <Compass size={14} color="var(--accent-cyan)" />
             <span>NADIR-7 // {currentRoomName.replace('_', ' ')}</span>
           </div>
 
           <div
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '0.7rem',
+              fontSize: 'clamp(0.62rem, 1vw, 0.7rem)',
               fontWeight: 700,
-              letterSpacing: '0.06em',
+              letterSpacing: '0.04em',
               color: role === 'DISRUPTOR' ? '#ff3366' : 'var(--accent-cyan)',
-              marginTop: '2px',
+              marginTop: '1px',
             }}
           >
-            CLEARANCE: {role} {!isAlive && '• SPECTATOR GHOST'}
+            {role} {!isAlive && '• GHOST'}
           </div>
         </div>
 
         {/* Right: Map Shortcut & System Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             onClick={toggleMinimap}
             className="btn-sub"
-            style={{ padding: '8px 14px', fontSize: '0.8rem' }}
+            style={{ padding: '6px 12px', fontSize: 'clamp(0.72rem, 1vw, 0.8rem)' }}
             title="Toggle Facility Blueprint [M]"
           >
-            <Map size={15} />
-            <span>MAP [M]</span>
+            <Map size={14} />
+            <span>MAP</span>
           </button>
           <HeaderControls />
         </div>
@@ -228,10 +224,10 @@ export const GameHUD: React.FC = () => {
         className="sub-panel"
         style={{
           position: 'absolute',
-          top: '78px',
-          left: '24px',
-          width: '280px',
-          maxHeight: 'calc(100vh - 220px)',
+          top: 'clamp(62px, 11vh, 76px)',
+          left: 'max(14px, env(safe-area-inset-left, 14px))',
+          width: 'clamp(210px, 25vw, 270px)',
+          maxHeight: 'calc(100vh - 180px)',
           pointerEvents: 'auto',
           display: 'flex',
           flexDirection: 'column',
@@ -244,7 +240,7 @@ export const GameHUD: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '10px 14px',
+            padding: '8px 12px',
             backgroundColor: 'rgba(5, 12, 22, 0.85)',
             borderBottom: '1px solid var(--border-subtle)',
             cursor: 'pointer',
@@ -253,28 +249,28 @@ export const GameHUD: React.FC = () => {
           <span
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: '0.82rem',
+              fontSize: '0.78rem',
               color: 'var(--accent-cyan)',
               letterSpacing: '0.06em',
             }}
           >
-            DIRECTIVE PROTOCOLS
+            DIRECTIVES ({completedCount}/{assignedTasks.length})
           </span>
-          {isTasksOpen ? <ChevronUp size={15} color="var(--text-muted)" /> : <ChevronDown size={15} color="var(--text-muted)" />}
+          {isTasksOpen ? <ChevronUp size={14} color="var(--text-muted)" /> : <ChevronDown size={14} color="var(--text-muted)" />}
         </div>
 
         {isTasksOpen && (
           <div
             style={{
-              padding: '10px 14px',
+              padding: '8px 12px',
               overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px',
+              gap: '6px',
             }}
           >
             {assignedTasks.length === 0 ? (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                 No active directives assigned.
               </div>
             ) : (
@@ -287,7 +283,7 @@ export const GameHUD: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: '9px',
+                      gap: '8px',
                       cursor: isDone ? 'default' : 'pointer',
                       opacity: isDone ? 0.45 : 1,
                       transition: 'opacity 0.2s',
@@ -295,18 +291,19 @@ export const GameHUD: React.FC = () => {
                   >
                     <div style={{ marginTop: '2px' }}>
                       {isDone ? (
-                        <CheckSquare2 size={15} color="#00e676" />
+                        <CheckSquare2 size={14} color="#00e676" />
                       ) : (
-                        <Square size={15} color="var(--accent-cyan)" />
+                        <Square size={14} color="var(--accent-cyan)" />
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span
                         style={{
                           fontFamily: 'var(--font-body)',
-                          fontSize: '0.82rem',
+                          fontSize: '0.78rem',
                           color: isDone ? 'var(--text-muted)' : 'var(--text-primary)',
                           textDecoration: isDone ? 'line-through' : 'none',
+                          lineHeight: '1.2',
                         }}
                       >
                         {t.name}
@@ -314,7 +311,7 @@ export const GameHUD: React.FC = () => {
                       <span
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          fontSize: '0.68rem',
+                          fontSize: '0.64rem',
                           color: 'var(--text-muted)',
                         }}
                       >
@@ -333,10 +330,10 @@ export const GameHUD: React.FC = () => {
       <div
         style={{
           position: 'absolute',
-          bottom: '26px',
-          right: '26px',
+          bottom: 'max(18px, env(safe-area-inset-bottom, 18px))',
+          right: 'max(18px, env(safe-area-inset-right, 18px))',
           display: 'flex',
-          gap: '16px',
+          gap: 'clamp(10px, 1.5vw, 16px)',
           pointerEvents: 'auto',
           alignItems: 'center',
         }}
@@ -347,8 +344,8 @@ export const GameHUD: React.FC = () => {
             onClick={reportBody}
             className="btn-sub btn-warning"
             style={{
-              width: '84px',
-              height: '84px',
+              width: 'clamp(70px, 10vw, 84px)',
+              height: 'clamp(70px, 10vw, 84px)',
               borderRadius: '50%',
               display: 'flex',
               flexDirection: 'column',
@@ -358,8 +355,8 @@ export const GameHUD: React.FC = () => {
               animation: 'pulse 1.2s infinite alternate',
             }}
           >
-            <AlertOctagon size={28} />
-            <span style={{ fontSize: '0.68rem', marginTop: '2px' }}>REPORT [R]</span>
+            <AlertOctagon size={24} />
+            <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>REPORT [R]</span>
           </button>
         )}
 
@@ -370,8 +367,8 @@ export const GameHUD: React.FC = () => {
             disabled={sabotageCooldown > 0}
             className="btn-sub btn-danger"
             style={{
-              width: '84px',
-              height: '84px',
+              width: 'clamp(70px, 10vw, 84px)',
+              height: 'clamp(70px, 10vw, 84px)',
               borderRadius: '50%',
               display: 'flex',
               flexDirection: 'column',
@@ -381,8 +378,8 @@ export const GameHUD: React.FC = () => {
               boxShadow: sabotageCooldown === 0 ? '0 0 16px rgba(255, 51, 102, 0.4)' : 'none',
             }}
           >
-            <Flame size={26} />
-            <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>
+            <Flame size={24} />
+            <span style={{ fontSize: '0.62rem', marginTop: '2px' }}>
               {sabotageCooldown > 0 ? `${sabotageCooldown}s` : 'SABOTAGE [S]'}
             </span>
           </button>
@@ -395,8 +392,8 @@ export const GameHUD: React.FC = () => {
             disabled={killCooldown > 0 || !killableTargetId}
             className="btn-sub btn-danger"
             style={{
-              width: '90px',
-              height: '90px',
+              width: 'clamp(76px, 11vw, 90px)',
+              height: 'clamp(76px, 11vw, 90px)',
               borderRadius: '50%',
               display: 'flex',
               flexDirection: 'column',
@@ -408,8 +405,8 @@ export const GameHUD: React.FC = () => {
                   : 'none',
             }}
           >
-            <Skull size={30} />
-            <span style={{ fontSize: '0.7rem', marginTop: '2px' }}>
+            <Skull size={28} />
+            <span style={{ fontSize: '0.66rem', marginTop: '2px' }}>
               {killCooldown > 0 ? `${killCooldown}s` : 'KILL [Q]'}
             </span>
           </button>
@@ -421,8 +418,8 @@ export const GameHUD: React.FC = () => {
           disabled={!nearbyInteractable}
           className="btn-sub"
           style={{
-            width: '96px',
-            height: '96px',
+            width: 'clamp(82px, 12vw, 96px)',
+            height: 'clamp(82px, 12vw, 96px)',
             borderRadius: '50%',
             display: 'flex',
             flexDirection: 'column',
@@ -433,8 +430,8 @@ export const GameHUD: React.FC = () => {
             backgroundColor: nearbyInteractable ? 'rgba(0, 243, 255, 0.16)' : undefined,
           }}
         >
-          <Hand size={32} />
-          <span style={{ fontSize: '0.74rem', marginTop: '2px' }}>USE [E]</span>
+          <Hand size={28} />
+          <span style={{ fontSize: '0.7rem', marginTop: '2px' }}>USE [E]</span>
         </button>
       </div>
     </div>

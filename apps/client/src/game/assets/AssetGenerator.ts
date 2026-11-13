@@ -66,6 +66,24 @@ export class AssetGenerator {
     if (!tm.exists('prop_emergency_table')) {
       this.generateEmergencyTable(scene);
     }
+    if (!tm.exists('prop_rotunda_dais')) {
+      this.generateRotundaDais(scene);
+    }
+    if (!tm.exists('prop_moon_pool')) {
+      this.generateMoonPool(scene);
+    }
+    if (!tm.exists('prop_anomaly_pedestal')) {
+      this.generateAnomalyPedestal(scene);
+    }
+    if (!tm.exists('prop_magma_rift')) {
+      this.generateMagmaRift(scene);
+    }
+    if (!tm.exists('prop_spirulina_column')) {
+      this.generateSpirulinaColumn(scene);
+    }
+    if (!tm.exists('viewport_window_panoramic')) {
+      this.generatePanoramicViewport(scene);
+    }
     if (!tm.exists('prop_docking_clamp')) {
       this.generateDockingClamp(scene);
     }
@@ -581,67 +599,434 @@ export class AssetGenerator {
   // ----------------------------------------------------
 
   private static generateEmergencyTable(scene: Phaser.Scene): void {
-    const c = this.createCanvas(88, 88);
+    const c = this.createCanvas(96, 96);
     const ctx = c.getContext('2d')!;
 
-    // Central Junction: Striking octagonal command table
-    ctx.fillStyle = '#172332';
+    // Outer circular dais in deep slate titanium
+    const daisGrad = ctx.createRadialGradient(48, 48, 10, 48, 48, 46);
+    daisGrad.addColorStop(0, '#1c293a');
+    daisGrad.addColorStop(0.7, '#15202d');
+    daisGrad.addColorStop(1, '#0e1620');
+    ctx.fillStyle = daisGrad;
     ctx.beginPath();
-    ctx.moveTo(26, 4);
-    ctx.lineTo(62, 4);
-    ctx.lineTo(84, 26);
-    ctx.lineTo(84, 62);
-    ctx.lineTo(62, 84);
-    ctx.lineTo(26, 84);
-    ctx.lineTo(4, 62);
-    ctx.lineTo(4, 26);
-    ctx.closePath();
+    ctx.arc(48, 48, 46, 0, Math.PI * 2);
     ctx.fill();
 
-    // Beveled rim
-    ctx.strokeStyle = '#2b3f57';
-    ctx.lineWidth = 2;
+    // Beveled rim with precision hex bolts
+    ctx.strokeStyle = '#2d425b';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Illuminated cyan floor compass ring
+    // Cyan illuminated perimeter compass ring
     ctx.strokeStyle = '#00f3ff';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(44, 44, 28, 0, Math.PI * 2);
+    ctx.arc(48, 48, 40, 0, Math.PI * 2);
     ctx.stroke();
 
-    // 8 Station terminal notches
+    // 8 Station terminal notches with cyan status LEDs
     for (let i = 0; i < 8; i++) {
       const angle = (i * Math.PI) / 4;
-      const tx = 44 + Math.cos(angle) * 32;
-      const ty = 44 + Math.sin(angle) * 32;
+      const tx = 48 + Math.cos(angle) * 40;
+      const ty = 48 + Math.sin(angle) * 40;
       ctx.fillStyle = '#00f3ff';
       ctx.fillRect(tx - 2, ty - 2, 4, 4);
+
+      // Station keyboard wedge
+      const kx = 48 + Math.cos(angle) * 32;
+      const ky = 48 + Math.sin(angle) * 32;
+      ctx.fillStyle = '#223246';
+      ctx.fillRect(kx - 3, ky - 3, 6, 6);
     }
 
+    // Holographic 3D Bathymetric Trench Projection
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.45)';
+    ctx.lineWidth = 1;
+    // Concentric depth contour lines
+    ctx.beginPath();
+    ctx.arc(48, 48, 24, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(48, 48, 17, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Bathymetric depth grid lines
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.25)';
+    ctx.beginPath();
+    ctx.moveTo(24, 48);
+    ctx.lineTo(72, 48);
+    ctx.moveTo(48, 24);
+    ctx.lineTo(48, 72);
+    ctx.stroke();
+
+    // Holographic trench beacon blip
+    ctx.fillStyle = '#00ffff';
+    ctx.beginPath();
+    ctx.arc(54, 42, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
     // Glass domed emergency housing
-    const domeGrad = ctx.createRadialGradient(44, 44, 2, 44, 44, 18);
-    domeGrad.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
-    domeGrad.addColorStop(0.5, 'rgba(0, 240, 255, 0.35)');
-    domeGrad.addColorStop(1, 'rgba(0, 80, 160, 0.2)');
+    const domeGrad = ctx.createRadialGradient(48, 48, 2, 48, 48, 12);
+    domeGrad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    domeGrad.addColorStop(0.5, 'rgba(0, 240, 255, 0.4)');
+    domeGrad.addColorStop(1, 'rgba(0, 80, 160, 0.25)');
     ctx.fillStyle = domeGrad;
     ctx.beginPath();
-    ctx.arc(44, 44, 18, 0, Math.PI * 2);
+    ctx.arc(48, 48, 12, 0, Math.PI * 2);
     ctx.fill();
 
     // EMERGENCY DISPATCH RED BUTTON
     ctx.fillStyle = '#ff1744';
     ctx.beginPath();
-    ctx.arc(44, 44, 10, 0, Math.PI * 2);
+    ctx.arc(48, 48, 8, 0, Math.PI * 2);
     ctx.fill();
 
     // Specular shine
     ctx.fillStyle = '#ff8a80';
     ctx.beginPath();
-    ctx.arc(42, 42, 3, 0, Math.PI * 2);
+    ctx.arc(46, 46, 2.5, 0, Math.PI * 2);
     ctx.fill();
 
     scene.textures.addCanvas('prop_emergency_table', c);
+  }
+
+  private static generateRotundaDais(scene: Phaser.Scene): void {
+    if (scene.textures.exists('prop_emergency_table')) {
+      const tex = scene.textures.get('prop_emergency_table');
+      scene.textures.addCanvas('prop_rotunda_dais', (tex.getSourceImage() as HTMLCanvasElement));
+    }
+  }
+
+  private static generateMoonPool(scene: Phaser.Scene): void {
+    const c = this.createCanvas(96, 96);
+    const ctx = c.getContext('2d')!;
+
+    // Outer deck border in deep slate
+    ctx.fillStyle = '#131b26';
+    ctx.fillRect(0, 0, 96, 96);
+
+    // Hazard safety border around pool perimeter
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 88, 88);
+
+    // Hazard diagonal notches along perimeter
+    ctx.fillStyle = '#0d131c';
+    for (let i = 8; i < 88; i += 12) {
+      ctx.fillRect(i, 2, 6, 4);
+      ctx.fillRect(i, 90, 6, 4);
+      ctx.fillRect(2, i, 4, 6);
+      ctx.fillRect(90, i, 4, 6);
+    }
+
+    // Circular open sea water pool
+    const poolGrad = ctx.createRadialGradient(48, 48, 4, 48, 48, 38);
+    poolGrad.addColorStop(0, '#01050e');
+    poolGrad.addColorStop(0.6, '#020d1c');
+    poolGrad.addColorStop(0.9, '#04162c');
+    poolGrad.addColorStop(1, '#0b2342');
+    ctx.fillStyle = poolGrad;
+    ctx.beginPath();
+    ctx.arc(48, 48, 38, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pool retaining ring
+    ctx.strokeStyle = '#1b2f48';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Caustic underwater light ripples
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.28)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(48, 46, 26, 12, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(0, 255, 180, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(48, 52, 16, 8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Rising microbubbles
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillRect(42, 40, 2, 2);
+    ctx.fillRect(52, 34, 1.5, 1.5);
+    ctx.fillRect(46, 56, 2, 2);
+
+    // Yellow submersible docking guide rails on sides
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(16, 24, 4, 48);
+    ctx.fillRect(76, 24, 4, 48);
+
+    // Hydraulic guide lock arms
+    ctx.fillStyle = '#3a4e69';
+    ctx.fillRect(14, 32, 8, 6);
+    ctx.fillRect(14, 58, 8, 6);
+    ctx.fillRect(74, 32, 8, 6);
+    ctx.fillRect(74, 58, 8, 6);
+
+    scene.textures.addCanvas('prop_moon_pool', c);
+  }
+
+  private static generateAnomalyPedestal(scene: Phaser.Scene): void {
+    const c = this.createCanvas(64, 64);
+    const ctx = c.getContext('2d')!;
+
+    // Heavy cast titanium containment base
+    ctx.fillStyle = '#172230';
+    ctx.beginPath();
+    ctx.ellipse(32, 52, 26, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#293d56';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Pedestal column
+    ctx.fillStyle = '#1c2838';
+    ctx.fillRect(20, 38, 24, 14);
+
+    // Warning hazard ring
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(22, 44, 20, 2);
+
+    // 3 Electromagnetic magnetic levitation rings
+    ctx.strokeStyle = '#00f3ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(32, 38, 18, 5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#bf55ec';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(32, 28, 14, 4, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#00f3ff';
+    ctx.beginPath();
+    ctx.ellipse(32, 18, 18, 5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Central Anomaly: Vitreous Electrum crystal floating in electromagnetic field
+    const auraGrad = ctx.createRadialGradient(32, 26, 2, 32, 26, 16);
+    auraGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    auraGrad.addColorStop(0.3, 'rgba(0, 243, 255, 0.6)');
+    auraGrad.addColorStop(0.7, 'rgba(191, 85, 236, 0.4)');
+    auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(32, 26, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Floating crystal geometry
+    ctx.fillStyle = '#e0f7fa';
+    ctx.beginPath();
+    ctx.moveTo(32, 18);
+    ctx.lineTo(39, 26);
+    ctx.lineTo(32, 34);
+    ctx.lineTo(25, 26);
+    ctx.closePath();
+    ctx.fill();
+
+    // Facet shading
+    ctx.fillStyle = '#00f3ff';
+    ctx.beginPath();
+    ctx.moveTo(32, 18);
+    ctx.lineTo(39, 26);
+    ctx.lineTo(32, 26);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#bf55ec';
+    ctx.beginPath();
+    ctx.moveTo(25, 26);
+    ctx.lineTo(32, 34);
+    ctx.lineTo(32, 26);
+    ctx.closePath();
+    ctx.fill();
+
+    // Electric spark arc
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(32, 22);
+    ctx.lineTo(35, 20);
+    ctx.lineTo(44, 21);
+    ctx.stroke();
+
+    scene.textures.addCanvas('prop_anomaly_pedestal', c);
+  }
+
+  private static generateMagmaRift(scene: Phaser.Scene): void {
+    const c = this.createCanvas(128, 64);
+    const ctx = c.getContext('2d')!;
+
+    // Dark volcanic basalt bedrock
+    ctx.fillStyle = '#10141a';
+    ctx.fillRect(0, 0, 128, 64);
+
+    // Glowing magma fissure running diagonally across
+    const magmaGrad = ctx.createLinearGradient(0, 20, 0, 48);
+    magmaGrad.addColorStop(0, '#b71c1c');
+    magmaGrad.addColorStop(0.3, '#ff3d00');
+    magmaGrad.addColorStop(0.7, '#ff9100');
+    magmaGrad.addColorStop(0.85, '#ffea00');
+    magmaGrad.addColorStop(1, '#ff3d00');
+
+    ctx.fillStyle = magmaGrad;
+    ctx.beginPath();
+    ctx.moveTo(0, 24);
+    ctx.bezierCurveTo(35, 18, 70, 34, 128, 22);
+    ctx.lineTo(128, 44);
+    ctx.bezierCurveTo(75, 48, 40, 36, 0, 42);
+    ctx.closePath();
+    ctx.fill();
+
+    // Floating basalt crust islands
+    ctx.fillStyle = '#1a2029';
+    ctx.fillRect(30, 28, 12, 6);
+    ctx.fillRect(75, 30, 16, 7);
+    ctx.fillRect(100, 26, 10, 5);
+
+    // Industrial steel catwalk crossing over magma rift
+    ctx.fillStyle = 'rgba(24, 34, 46, 0.9)';
+    ctx.fillRect(44, 0, 40, 64);
+
+    // Steel mesh catwalk slits
+    ctx.strokeStyle = '#384d66';
+    ctx.lineWidth = 1;
+    for (let y = 4; y < 64; y += 6) {
+      ctx.beginPath();
+      ctx.moveTo(46, y);
+      ctx.lineTo(82, y);
+      ctx.stroke();
+    }
+
+    // Yellow safety handrails on sides of catwalk
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(44, 0, 3, 64);
+    ctx.fillRect(81, 0, 3, 64);
+
+    // Glowing orange thermal conduit pipe
+    ctx.fillStyle = '#ff7700';
+    ctx.fillRect(40, 0, 3, 64);
+    ctx.fillStyle = '#ffe082';
+    ctx.fillRect(41, 0, 1, 64);
+
+    scene.textures.addCanvas('prop_magma_rift', c);
+  }
+
+  private static generateSpirulinaColumn(scene: Phaser.Scene): void {
+    const c = this.createCanvas(56, 80);
+    const ctx = c.getContext('2d')!;
+
+    // Top and bottom stainless steel sanitary manifolds
+    ctx.fillStyle = '#1c2838';
+    ctx.fillRect(6, 2, 44, 10);
+    ctx.fillRect(6, 68, 44, 10);
+
+    ctx.strokeStyle = '#2d425b';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(6.5, 2.5, 43, 9);
+    ctx.strokeRect(6.5, 68.5, 43, 9);
+
+    // Transparent borosilicate cylinder
+    const colGrad = ctx.createLinearGradient(10, 12, 46, 12);
+    colGrad.addColorStop(0, 'rgba(0, 230, 118, 0.4)');
+    colGrad.addColorStop(0.3, 'rgba(0, 255, 150, 0.85)');
+    colGrad.addColorStop(0.7, 'rgba(0, 200, 110, 0.9)');
+    colGrad.addColorStop(1, 'rgba(0, 140, 70, 0.45)');
+    ctx.fillStyle = colGrad;
+    ctx.fillRect(10, 12, 36, 56);
+
+    // Spirulina double-helix micro-algae growth coils
+    ctx.strokeStyle = '#69f0ae';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(18, 64);
+    ctx.quadraticCurveTo(36, 50, 24, 38);
+    ctx.quadraticCurveTo(14, 26, 32, 16);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(38, 62);
+    ctx.quadraticCurveTo(20, 48, 34, 36);
+    ctx.quadraticCurveTo(42, 24, 24, 16);
+    ctx.stroke();
+
+    // Rising stream of oxygen micro-bubbles
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(20, 22, 2, 2);
+    ctx.fillRect(32, 30, 2, 2);
+    ctx.fillRect(26, 44, 2, 2);
+    ctx.fillRect(30, 56, 1.5, 1.5);
+
+    // Side LED grow strips (magenta / cool white)
+    ctx.fillStyle = '#e040fb';
+    ctx.fillRect(8, 14, 2, 52);
+    ctx.fillStyle = '#00f3ff';
+    ctx.fillRect(46, 14, 2, 52);
+
+    scene.textures.addCanvas('prop_spirulina_column', c);
+  }
+
+  private static generatePanoramicViewport(scene: Phaser.Scene): void {
+    const c = this.createCanvas(192, 64);
+    const ctx = c.getContext('2d')!;
+
+    // Heavy titanium pressure frame
+    ctx.fillStyle = '#121b27';
+    ctx.fillRect(0, 0, 192, 64);
+
+    // Expansive deep trench vista
+    const trenchGrad = ctx.createLinearGradient(0, 6, 0, 58);
+    trenchGrad.addColorStop(0, '#030d1d');
+    trenchGrad.addColorStop(0.5, '#020914');
+    trenchGrad.addColorStop(1, '#01050e');
+    ctx.fillStyle = trenchGrad;
+    ctx.fillRect(6, 6, 180, 52);
+
+    // Caustic refraction light sweeps across viewport
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(12, 20);
+    ctx.bezierCurveTo(60, 32, 120, 14, 180, 28);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(0, 255, 180, 0.12)';
+    ctx.beginPath();
+    ctx.moveTo(20, 42);
+    ctx.bezierCurveTo(75, 52, 130, 36, 175, 46);
+    ctx.stroke();
+
+    // Distant abyssal bioluminescent motes
+    ctx.fillStyle = 'rgba(0, 243, 255, 0.5)';
+    ctx.fillRect(45, 26, 2, 2);
+    ctx.fillRect(130, 36, 2, 2);
+    ctx.fillRect(160, 18, 1.5, 1.5);
+    ctx.fillStyle = 'rgba(191, 85, 236, 0.4)';
+    ctx.fillRect(85, 40, 2, 2);
+
+    // Specular glass glare diagonal
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+    ctx.beginPath();
+    ctx.moveTo(120, 6);
+    ctx.lineTo(165, 6);
+    ctx.lineTo(115, 58);
+    ctx.lineTo(70, 58);
+    ctx.closePath();
+    ctx.fill();
+
+    // Precision perimeter bolts
+    ctx.fillStyle = '#394d66';
+    for (let x = 12; x < 185; x += 16) {
+      ctx.fillRect(x, 2, 2, 2);
+      ctx.fillRect(x, 60, 2, 2);
+    }
+
+    scene.textures.addCanvas('viewport_window_panoramic', c);
   }
 
   private static generateDockingClamp(scene: Phaser.Scene): void {

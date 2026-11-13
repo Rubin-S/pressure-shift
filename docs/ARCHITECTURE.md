@@ -152,7 +152,16 @@ Corridors between sectors feature active cyan power conduits (`tile_conduit_h`, 
 1. **Phaser 3 Canvas Layer**:
    - Renders 60 FPS studio-grade procedural textures: beveled titanium bulkheads with horizontal cyan LED strips, modular composite deck plates, brushed stainless drainage grates, and polished rubberized corridors.
    - Smooth, non-creepy radial vision mask (`vision_mask`) centered on the active diver for atmospheric deep-sea exploration without harsh visual clipping.
-   - Distinct high-fidelity props for all 9 sectors (e.g. 88x88 octagonal command table, illuminated floor compass, spirulina bioreactors with rising microbubbles, panoramic quartz viewports with abyssal caustics).
+   - Distinct high-fidelity props and architectural centerpieces for all 9 sectors:
+     * `CMD-00` Central Dispatch: Tiered rotunda dais (`prop_rotunda_dais` / `prop_emergency_table`) with illuminated compass ring, 3D bathymetric holographic trench projection, and domed emergency button.
+     * `SEC-01` Submersible Docking Bay: 96x96 circular Moon Pool (`prop_moon_pool`) with hazard perimeter, caustic water ripples, rising microbubbles, and yellow gantry rails.
+     * `SEC-03` Hadal Bio-Dome Lab: 56x80 Vertical Spirulina Columns (`prop_spirulina_column`) with double-helix culture coils and LED grow strips.
+     * `SEC-04` Hydrostatic Testing Rig: Vitreous Electrum Anomaly Levitation Pedestal (`prop_anomaly_pedestal`) with 3 electromagnetic rings and floating crystal.
+     * `SEC-05` Geothermal Vent Generator: 128x64 Magma Rift & Catwalk (`prop_magma_rift`) featuring glowing volcanic fissures and heavy steel mesh walkway.
+     * `SEC-06` Abyssal Trench Overlook: 192x64 Panoramic Quartz Viewport (`viewport_window_panoramic`) with caustic light sweeps and deep-sea bioluminescence.
+     * `SEC-02` Sonar Control: Concentric CRT sweep radar display and telemetry blade towers.
+     * `SEC-07` Communications: Holographic dish transmitter and fiber-optic relay racks.
+     * `SEC-08` Medical Bay: Sterile diagnostic scanner pods and cryogenic sample incubators.
    - Modern sci-fi diving suits with curved cyan glass visors, chestplate oxygen telemetry LEDs, compact rebreathers, and smooth 4-directional walk cycles.
    - Coordinates with React via a decoupled Event Bus (`EventBus.ts`).
 2. **React 18 Overlay & HUD**:

@@ -126,7 +126,7 @@ test.describe('Pressure Shift - 4-Player Multiplayer End-to-End Simulation', () 
     await expect(closeMapBtn).toBeVisible({ timeout: 5000 });
     await expect(page1.locator('text=/NADIR-7 FACILITY SCHEMATICS|BLUEPRINT/i').first()).toBeVisible({ timeout: 5000 });
     await expect(page1.locator('text=/HULL INTEGRITY: 100% NOMINAL/i').first()).toBeVisible({ timeout: 5000 });
-    await expect(page1.locator('text=/STATION ATMOSPHERE/i').first()).toBeVisible({ timeout: 5000 });
+    await expect(page1.locator('text=/ATMOSPHERE: 21% O2/i').first()).toBeVisible({ timeout: 5000 });
 
     // Close map
     await closeMapBtn.click();
