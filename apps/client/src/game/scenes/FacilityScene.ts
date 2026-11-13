@@ -92,34 +92,42 @@ export class FacilityScene extends Phaser.Scene {
     const floorGraphics = this.add.graphics();
     floorGraphics.setDepth(-50);
 
-    // Render floor tiling for all 9 rooms
+    // Render studio-grade high-resolution reference backgrounds for all 9 rooms
     for (const [roomId, room] of Object.entries(FACILITY_ROOMS)) {
       const { x, y, width, height } = room.bounds;
 
-      let tileType = 'tile_floor_plate';
-      if (roomId === 'docking_cradle' || roomId === 'pressure_lab') {
-        tileType = 'tile_floor_grate';
-      } else if (roomId === 'thermal_plant') {
-        tileType = 'tile_floor_hazard';
-      } else if (roomId === 'hydroponics' || roomId === 'medical_bay') {
-        tileType = 'tile_floor_hex';
-      } else if (roomId === 'observation_gallery') {
-        tileType = 'tile_floor_rubber';
-      }
+      const bgKey = `room_bg_${roomId}`;
+      if (this.textures.exists(bgKey)) {
+        // High-resolution studio artwork matching the approved visual reference exactly
+        const bgImg = this.add.image(x + width / 2, y + height / 2, bgKey);
+        bgImg.setDisplaySize(width, height);
+        bgImg.setDepth(-40);
+      } else {
+        // Fallback procedural floor fill
+        let tileType = 'tile_floor_plate';
+        if (roomId === 'docking_cradle' || roomId === 'pressure_lab') {
+          tileType = 'tile_floor_grate';
+        } else if (roomId === 'thermal_plant') {
+          tileType = 'tile_floor_hazard';
+        } else if (roomId === 'hydroponics' || roomId === 'medical_bay') {
+          tileType = 'tile_floor_hex';
+        } else if (roomId === 'observation_gallery') {
+          tileType = 'tile_floor_rubber';
+        }
 
-      // Tiled floor fill
-      for (let tx = x; tx < x + width; tx += 32) {
-        for (let ty = y; ty < y + height; ty += 32) {
-          const tw = Math.min(32, x + width - tx);
-          const th = Math.min(32, y + height - ty);
-          if (tw === 32 && th === 32) {
-            this.add.image(tx + 16, ty + 16, tileType).setDepth(-50);
+        for (let tx = x; tx < x + width; tx += 32) {
+          for (let ty = y; ty < y + height; ty += 32) {
+            const tw = Math.min(32, x + width - tx);
+            const th = Math.min(32, y + height - ty);
+            if (tw === 32 && th === 32) {
+              this.add.image(tx + 16, ty + 16, tileType).setDepth(-50);
+            }
           }
         }
       }
 
       // Precision room perimeter border highlight
-      floorGraphics.lineStyle(1.5, 0x00f3ff, 0.35);
+      floorGraphics.lineStyle(2, 0x00f3ff, 0.45);
       floorGraphics.strokeRect(x, y, width, height);
     }
 
@@ -318,46 +326,51 @@ export class FacilityScene extends Phaser.Scene {
   // ----------------------------------------------------
 
   private createDecorativeProps(): void {
-    // 1. SEC-06 Observation Dome: Massive Panoramic Trench Viewport
-    const obs = FACILITY_ROOMS.observation_gallery.bounds;
-    this.add.image(obs.x + obs.width / 2, obs.y + 40, 'viewport_window_panoramic').setDepth(12);
+    const hasStudioArt = this.textures.exists('room_bg_central_junction');
 
-    // 2. SEC-02 Sonar Telemetry: Viewport & Server Blade Racks
-    const sonar = FACILITY_ROOMS.sonar_control.bounds;
-    this.add.image(sonar.x + sonar.width / 2, sonar.y + 40, 'viewport_window').setDepth(12);
-    this.add.image(sonar.x + 80, sonar.y + 120, 'prop_server_rack').setDepth(5);
+    // Only render procedural fallback stamps if studio reference art is missing
+    if (!hasStudioArt) {
+      // 1. SEC-06 Observation Dome: Massive Panoramic Trench Viewport
+      const obs = FACILITY_ROOMS.observation_gallery.bounds;
+      this.add.image(obs.x + obs.width / 2, obs.y + 40, 'viewport_window_panoramic').setDepth(12);
 
-    // 3. SEC-01 Submersible Docking Bay: Circular Moon Pool & Docking Clamps
-    const dock = FACILITY_ROOMS.docking_cradle.bounds;
-    this.add.image(dock.x + dock.width / 2, dock.y + 190, 'prop_moon_pool').setDepth(-45);
-    this.add.image(dock.x + 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
-    this.add.image(dock.x + dock.width - 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
+      // 2. SEC-02 Sonar Telemetry: Viewport & Server Blade Racks
+      const sonar = FACILITY_ROOMS.sonar_control.bounds;
+      this.add.image(sonar.x + sonar.width / 2, sonar.y + 40, 'viewport_window').setDepth(12);
+      this.add.image(sonar.x + 80, sonar.y + 120, 'prop_server_rack').setDepth(5);
 
-    // 4. SEC-04 Hydrostatic Testing Rig: Vitreous Electrum Anomaly Levitation Pedestal
-    const pressure = FACILITY_ROOMS.pressure_lab.bounds;
-    this.add.image(pressure.x + pressure.width / 2, pressure.y + 180, 'prop_anomaly_pedestal').setDepth(5);
+      // 3. SEC-01 Submersible Docking Bay: Circular Moon Pool & Docking Clamps
+      const dock = FACILITY_ROOMS.docking_cradle.bounds;
+      this.add.image(dock.x + dock.width / 2, dock.y + 190, 'prop_moon_pool').setDepth(-45);
+      this.add.image(dock.x + 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
+      this.add.image(dock.x + dock.width - 80, dock.y + 190, 'prop_docking_clamp').setDepth(5);
 
-    // 5. SEC-05 Geothermal Vent Generator: Magma Rift & Catwalk
-    const thermal = FACILITY_ROOMS.thermal_plant.bounds;
-    this.add.image(thermal.x + thermal.width / 2, thermal.y + 190, 'prop_magma_rift').setDepth(-45);
+      // 4. SEC-04 Hydrostatic Testing Rig: Vitreous Electrum Anomaly Levitation Pedestal
+      const pressure = FACILITY_ROOMS.pressure_lab.bounds;
+      this.add.image(pressure.x + pressure.width / 2, pressure.y + 180, 'prop_anomaly_pedestal').setDepth(5);
 
-    // 6. SEC-03 Hadal Bio-Dome Lab: Vertical Spirulina Photobioreactors
-    const hydro = FACILITY_ROOMS.hydroponics.bounds;
-    this.add.image(hydro.x + 80, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
-    this.add.image(hydro.x + 160, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
-    this.add.image(hydro.x + 340, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
-    this.add.image(hydro.x + 420, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+      // 5. SEC-05 Geothermal Vent Generator: Magma Rift & Catwalk
+      const thermal = FACILITY_ROOMS.thermal_plant.bounds;
+      this.add.image(thermal.x + thermal.width / 2, thermal.y + 190, 'prop_magma_rift').setDepth(-45);
 
-    // 7. SEC-07 Trans-Oceanic Relay: Server Blade Cabinets
-    const comms = FACILITY_ROOMS.communications.bounds;
-    this.add.image(comms.x + 100, comms.y + 130, 'prop_server_rack').setDepth(5);
-    this.add.image(comms.x + 400, comms.y + 130, 'prop_server_rack').setDepth(5);
+      // 6. SEC-03 Hadal Bio-Dome Lab: Vertical Spirulina Photobioreactors
+      const hydro = FACILITY_ROOMS.hydroponics.bounds;
+      this.add.image(hydro.x + 80, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+      this.add.image(hydro.x + 160, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+      this.add.image(hydro.x + 340, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
+      this.add.image(hydro.x + 420, hydro.y + 130, 'prop_spirulina_column').setDepth(5);
 
-    // 8. SEC-08 Hyperbaric Cryo-Lab: Diagnostic Pods
-    const med = FACILITY_ROOMS.medical_bay.bounds;
-    this.add.image(med.x + 100, med.y + 130, 'prop_med_bed').setDepth(5);
-    this.add.image(med.x + 250, med.y + 130, 'prop_med_bed').setDepth(5);
-    this.add.image(med.x + 400, med.y + 130, 'prop_med_bed').setDepth(5);
+      // 7. SEC-07 Trans-Oceanic Relay: Server Blade Cabinets
+      const comms = FACILITY_ROOMS.communications.bounds;
+      this.add.image(comms.x + 100, comms.y + 130, 'prop_server_rack').setDepth(5);
+      this.add.image(comms.x + 400, comms.y + 130, 'prop_server_rack').setDepth(5);
+
+      // 8. SEC-08 Hyperbaric Cryo-Lab: Diagnostic Pods
+      const med = FACILITY_ROOMS.medical_bay.bounds;
+      this.add.image(med.x + 100, med.y + 130, 'prop_med_bed').setDepth(5);
+      this.add.image(med.x + 250, med.y + 130, 'prop_med_bed').setDepth(5);
+      this.add.image(med.x + 400, med.y + 130, 'prop_med_bed').setDepth(5);
+    }
 
     // 9. Emergency Siren Beacons on Bulkheads
     for (const [, room] of Object.entries(FACILITY_ROOMS)) {

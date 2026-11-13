@@ -7,8 +7,19 @@ export class BootScene extends Phaser.Scene {
   }
 
   public preload(): void {
-    // Generate all procedural pixel art assets
+    // 1. Generate procedural pixel art assets & spritesheets
     AssetGenerator.generateAll(this);
+
+    // 2. Preload studio-grade high-resolution room environments matching the approved visual reference
+    this.load.image('room_bg_central_junction', '/assets/v2/mobile_views/01_command_rotunda.jpg');
+    this.load.image('room_bg_docking_cradle', '/assets/v2/mobile_views/02_moon_pool_dock.jpg');
+    this.load.image('room_bg_sonar_control', '/assets/v2/mobile_views/03_sonar_array.jpg');
+    this.load.image('room_bg_communications', '/assets/v2/mobile_views/04_comms_circuit.jpg');
+    this.load.image('room_bg_pressure_lab', '/assets/v2/mobile_views/05_black_chamber_anomaly.jpg');
+    this.load.image('room_bg_thermal_plant', '/assets/v2/mobile_views/06_geothermal_catwalk.jpg');
+    this.load.image('room_bg_hydroponics', '/assets/v2/mobile_views/07_hydroponics_dome.jpg');
+    this.load.image('room_bg_observation_gallery', '/assets/v2/mobile_views/08_trench_overlook.jpg');
+    this.load.image('room_bg_medical_bay', '/assets/v2/mobile_views/05_black_chamber_anomaly.jpg');
   }
 
   public create(): void {
