@@ -12,11 +12,11 @@
 ## 2. Player Roles & Objectives
 
 ### 2.1 Operators (Station Crew)
-- **Primary Goal**: Restore full station operational equilibrium by completing maintenance tasks across all 8 sectors, or identify and eject all Disruptors through emergency meetings.
+- **Primary Goal**: Restore full station operational equilibrium by completing maintenance tasks across all facility sectors, or identify and eject all Disruptors through emergency meetings.
 - **Abilities**:
   - `INTERACT / USE` (Key `E` or UI Button): Engage with mini-game terminals when within 75 px.
   - `REPORT` (Key `R` or UI Button): Report a dead diver body discovered within 85 px to trigger an immediate Emergency Meeting.
-  - `EMERGENCY BUTTON`: Located in `docking_cradle`. Limited to 1 use per player per game. Initiates an Emergency Meeting.
+  - `EMERGENCY BUTTON`: Located at the central command table in `central_junction` (`CMD-00`). Limited to 1 use per player per game. Initiates an Emergency Meeting.
   - `REPAIR SABOTAGE`: Intervene at damaged subsystems during emergencies (oxygen depletion, reactor thermal runaway, electrical failure).
 - **Spectator / Ghost State**: Ejected or killed Operators become translucent submersibles/ghosts. They can swim through bulkheads and continue completing tasks to advance the team task meter, but cannot speak in meetings or interact with living crew.
 
@@ -53,10 +53,10 @@ Eight interactive mini-games provide mechanical engagement:
 ## 4. Emergency Meetings & Voting Mechanics
 
 1. **Trigger Condition**:
-   - Operator or Disruptor presses `docking_cradle` Emergency Console (subject to game settings: 1 call per player).
+   - Operator or Disruptor presses `central_junction` Emergency Console (subject to game settings: 1 call per player).
    - Any diver reports a fallen crew member (`report:body`).
 2. **Phases**:
-   - **Alarm & Assembly**: All players instantly teleported to the Central Table in `docking_cradle`. Dead bodies cleared from station floor.
+   - **Alarm & Assembly**: All players instantly teleported to the Central Table in `central_junction`. Dead bodies cleared from station floor.
    - **Discussion Phase**: Configurable timer (e.g. 15–30 seconds) during which players exchange text messages or discuss suspects.
    - **Voting Phase**: Configurable timer (e.g. 30–60 seconds). Every alive player can cast 1 vote for any alive player, or select `Skip Vote`.
    - **Tally & Tie-Breaking**:

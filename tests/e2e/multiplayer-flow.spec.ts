@@ -31,7 +31,7 @@ test.describe('Pressure Shift - 4-Player Multiplayer End-to-End Simulation', () 
     page4 = await context4.newPage();
 
     // 2. Client 1 (Host: Captain-Nadir) opens application and creates a room
-    await page1.goto('/');
+    await page1.goto('/', { waitUntil: 'domcontentloaded' });
     await expect(page1.locator('h1')).toHaveText(/PRESSURE SHIFT/i, { timeout: 15000 });
 
     // Fill in host player callsign
@@ -55,7 +55,7 @@ test.describe('Pressure Shift - 4-Player Multiplayer End-to-End Simulation', () 
 
     // 4. Clients 2, 3, 4 join the room concurrently
     const joinClient = async (page: Page, playerName: string) => {
-      await page.goto('/');
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('h1')).toHaveText(/PRESSURE SHIFT/i, { timeout: 15000 });
 
       const nameInput = page.locator('input[placeholder*="callsign" i]');
@@ -121,10 +121,12 @@ test.describe('Pressure Shift - 4-Player Multiplayer End-to-End Simulation', () 
     await expect(mapBtn).toBeVisible({ timeout: 10000 });
     await mapBtn.click();
 
-    // Verify schematic overview modal is open
+    // Verify schematic overview modal is open with studio telemetry diagnostics
     const closeMapBtn = page1.locator('button:has-text("CLOSE")').first();
     await expect(closeMapBtn).toBeVisible({ timeout: 5000 });
-    await expect(page1.locator('text=/FACILITY SCHEMATIC|BLUEPRINT/i').first()).toBeVisible({ timeout: 5000 });
+    await expect(page1.locator('text=/NADIR-7 FACILITY SCHEMATICS|BLUEPRINT/i').first()).toBeVisible({ timeout: 5000 });
+    await expect(page1.locator('text=/HULL INTEGRITY: 100% NOMINAL/i').first()).toBeVisible({ timeout: 5000 });
+    await expect(page1.locator('text=/STATION ATMOSPHERE/i').first()).toBeVisible({ timeout: 5000 });
 
     // Close map
     await closeMapBtn.click();

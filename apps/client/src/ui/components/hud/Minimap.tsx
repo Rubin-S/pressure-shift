@@ -1,19 +1,102 @@
 import React, { useEffect } from 'react';
 import { useGame } from '../../context/GameContext.js';
-import { FACILITY_ROOMS, FacilityRoomId } from '@pressure-shift/shared';
-import { MapPin, X, AlertTriangle, Shield, CheckCircle } from 'lucide-react';
+import { FacilityRoomId } from '@pressure-shift/shared';
+import {
+  MapPin,
+  X,
+  AlertTriangle,
+  Radio,
+  CheckCircle2,
+  Compass,
+  Activity,
+  ShieldCheck,
+} from 'lucide-react';
 
-const ROOM_COORDINATES: Record<FacilityRoomId, { x: number; y: number; label: string }> = {
-  docking_cradle: { x: 15, y: 15, label: 'Docking Bay' },
-  sonar_control: { x: 50, y: 15, label: 'Sonar Control' },
-  hydroponics: { x: 85, y: 15, label: 'Hydroponics' },
-  pressure_lab: { x: 15, y: 50, label: 'Pressure Lab' },
-  central_junction: { x: 50, y: 50, label: 'Central Junction' },
-  observation_gallery: { x: 85, y: 50, label: 'Observation' },
-  thermal_plant: { x: 15, y: 85, label: 'Thermal Plant' },
-  communications: { x: 50, y: 85, label: 'Comms' },
-  medical_bay: { x: 85, y: 85, label: 'Medical Bay' },
+interface SectorLayout {
+  code: string;
+  name: string;
+  subtitle: string;
+  x: number;
+  y: number;
+}
+
+const SECTOR_LAYOUTS: Record<FacilityRoomId, SectorLayout> = {
+  docking_cradle: {
+    code: 'SEC-01',
+    name: 'Docking Cradle',
+    subtitle: 'Submersible Airlock Bay',
+    x: 18,
+    y: 18,
+  },
+  sonar_control: {
+    code: 'SEC-02',
+    name: 'Sonar Control',
+    subtitle: 'Acoustic Array Telemetry',
+    x: 50,
+    y: 18,
+  },
+  hydroponics: {
+    code: 'SEC-03',
+    name: 'Hydroponics',
+    subtitle: 'Spirulina O2 Scrubbers',
+    x: 82,
+    y: 18,
+  },
+  pressure_lab: {
+    code: 'SEC-04',
+    name: 'Pressure Lab',
+    subtitle: 'Hyperbaric Testing Seals',
+    x: 18,
+    y: 50,
+  },
+  central_junction: {
+    code: 'CMD-00',
+    name: 'Central Junction',
+    subtitle: 'Command & Dispatch Hub',
+    x: 50,
+    y: 50,
+  },
+  observation_gallery: {
+    code: 'SEC-05',
+    name: 'Observation Gallery',
+    subtitle: 'Deep Abyssal Trench View',
+    x: 82,
+    y: 50,
+  },
+  thermal_plant: {
+    code: 'SEC-06',
+    name: 'Thermal Plant',
+    subtitle: 'Geothermal Exchanger Core',
+    x: 18,
+    y: 82,
+  },
+  communications: {
+    code: 'SEC-07',
+    name: 'Communications',
+    subtitle: 'ULF Hydro-Acoustic Relay',
+    x: 50,
+    y: 82,
+  },
+  medical_bay: {
+    code: 'SEC-08',
+    name: 'Medical Bay',
+    subtitle: 'Cryo-Bioscan & Analysis',
+    x: 82,
+    y: 82,
+  },
 };
+
+// Structural corridors connecting the 9 rooms (grid topology)
+const CORRIDOR_PATHS = [
+  // Horizontal corridors
+  { x1: '18%', y1: '18%', x2: '82%', y2: '18%' },
+  { x1: '18%', y1: '50%', x2: '82%', y2: '50%' },
+  { x1: '18%', y1: '82%', x2: '82%', y2: '82%' },
+  // Vertical corridors
+  { x1: '18%', y1: '18%', x2: '18%', y2: '82%' },
+  { x1: '50%', y1: '18%', x2: '50%', y2: '82%' },
+  { x1: '82%', y1: '18%', x2: '82%', y2: '82%' },
+];
 
 export const Minimap: React.FC = () => {
   const {
@@ -25,7 +108,6 @@ export const Minimap: React.FC = () => {
     role,
   } = useGame();
 
-  // 'M' hotkey to toggle minimap
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'm' || e.key === 'M') {
@@ -46,13 +128,14 @@ export const Minimap: React.FC = () => {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(2, 6, 12, 0.75)',
-        backdropFilter: 'blur(6px)',
+        backgroundColor: 'rgba(2, 6, 12, 0.82)',
+        backdropFilter: 'blur(10px)',
         zIndex: 2500,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '24px',
+        animation: 'fadeIn 0.2s ease-out',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) toggleMinimap();
@@ -61,61 +144,104 @@ export const Minimap: React.FC = () => {
       <div
         className="sub-panel"
         style={{
-          width: '740px',
+          width: '820px',
           maxWidth: '96vw',
-          maxHeight: '92vh',
-          backgroundColor: 'rgba(5, 14, 25, 0.98)',
-          border: '2px solid var(--accent-cyan-dim)',
-          boxShadow: '0 0 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 243, 255, 0.25)',
+          maxHeight: '94vh',
+          backgroundColor: 'rgba(7, 15, 26, 0.96)',
+          border: '1px solid rgba(0, 243, 255, 0.28)',
+          boxShadow: '0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 243, 255, 0.15)',
           display: 'flex',
           flexDirection: 'column',
-          padding: '20px',
+          padding: '22px 26px',
         }}
       >
-        {/* Header */}
+        {/* Top Header */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            borderBottom: '1px solid var(--border-sub)',
-            paddingBottom: '12px',
+            borderBottom: '1px solid var(--border-subtle)',
+            paddingBottom: '14px',
             marginBottom: '16px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MapPin size={22} color="var(--accent-cyan)" />
-            <span
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
               style={{
-                fontFamily: 'var(--font-header)',
-                fontSize: '1.1rem',
-                color: 'var(--accent-cyan)',
-                letterSpacing: '1px',
+                width: '36px',
+                height: '36px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(0, 243, 255, 0.1)',
+                border: '1px solid var(--accent-cyan)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              FACILITY SCHEMATIC OVERVIEW
-            </span>
+              <Compass size={20} color="var(--accent-cyan)" />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontFamily: 'var(--font-header)',
+                  fontSize: '1.05rem',
+                  color: '#ffffff',
+                  letterSpacing: '0.08em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <span>NADIR-7 FACILITY SCHEMATICS</span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.7rem',
+                    color: 'var(--accent-cyan)',
+                    backgroundColor: 'rgba(0, 243, 255, 0.12)',
+                    padding: '2px 6px',
+                    borderRadius: '2px',
+                    border: '1px solid rgba(0, 243, 255, 0.3)',
+                  }}
+                >
+                  LIVE TELEMETRY
+                </span>
+              </div>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.72rem',
+                  color: 'var(--text-muted)',
+                  marginTop: '2px',
+                }}
+              >
+                TACTICAL SECTOR MATRIX // DEPTH: 8,400 M // PRESSURE: 840 ATM
+              </div>
+            </div>
           </div>
 
-          <button onClick={toggleMinimap} className="btn-sub btn-danger" style={{ padding: '6px 12px' }}>
-            <X size={16} />
+          <button onClick={toggleMinimap} className="btn-sub btn-danger" style={{ padding: '6px 14px' }}>
+            <X size={15} />
             <span>CLOSE [M]</span>
           </button>
         </div>
 
-        {/* Map Blueprint Grid */}
+        {/* Blueprint Facility Matrix Canvas */}
         <div
           style={{
             width: '100%',
-            height: '420px',
-            backgroundColor: '#030810',
-            border: '2px solid var(--border-sub)',
+            height: '440px',
+            backgroundColor: '#040912',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '4px',
             position: 'relative',
-            boxShadow: 'inset 0 0 35px rgba(0, 0, 0, 0.9)',
+            overflow: 'hidden',
+            boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.95)',
           }}
         >
-          {/* Blueprint Grid Lines */}
+          {/* Subtle Grid Lines */}
           <div
             style={{
               position: 'absolute',
@@ -124,18 +250,46 @@ export const Minimap: React.FC = () => {
               width: '100%',
               height: '100%',
               backgroundImage: `
-                linear-gradient(to right, rgba(0, 243, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 243, 255, 0.08) 1px, transparent 1px)
+                linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px)
               `,
-              backgroundSize: '40px 40px',
+              backgroundSize: '36px 36px',
+              pointerEvents: 'none',
             }}
           />
 
-          {/* Rooms */}
-          {Object.entries(ROOM_COORDINATES).map(([roomId, data]) => {
+          {/* SVG Power Conduits & Interconnecting Corridors */}
+          <svg
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+          >
+            {CORRIDOR_PATHS.map((corridor, idx) => (
+              <line
+                key={idx}
+                x1={corridor.x1}
+                y1={corridor.y1}
+                x2={corridor.x2}
+                y2={corridor.y2}
+                stroke="rgba(0, 243, 255, 0.22)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="8 6"
+              />
+            ))}
+          </svg>
+
+          {/* 9 Facility Sector Rooms */}
+          {Object.entries(SECTOR_LAYOUTS).map(([roomId, data]) => {
             const isCurrentRoom = currentRoomName === roomId;
             const roomTasks = assignedTasks.filter((t) => t.room === roomId);
-            const hasIncompleteTasks = roomTasks.some((t) => t.status !== 'COMPLETED');
+            const pendingTasks = roomTasks.filter((t) => t.status !== 'COMPLETED');
+            const hasPendingTasks = pendingTasks.length > 0;
             const isSabotaged = activeSabotage && activeSabotage.targetRoom === roomId;
 
             return (
@@ -146,97 +300,181 @@ export const Minimap: React.FC = () => {
                   top: `${data.y}%`,
                   left: `${data.x}%`,
                   transform: 'translate(-50%, -50%)',
-                  width: '170px',
-                  height: '85px',
+                  width: '185px',
+                  height: '92px',
                   backgroundColor: isCurrentRoom
-                    ? 'rgba(0, 243, 255, 0.18)'
+                    ? 'rgba(0, 243, 255, 0.16)'
                     : isSabotaged
-                    ? 'rgba(255, 56, 100, 0.25)'
-                    : 'rgba(8, 20, 34, 0.85)',
-                  border: `2px solid ${
+                    ? 'rgba(255, 51, 102, 0.22)'
+                    : 'rgba(8, 17, 30, 0.92)',
+                  border: `1px solid ${
                     isCurrentRoom
                       ? '#00f3ff'
                       : isSabotaged
-                      ? '#ff3864'
-                      : hasIncompleteTasks
+                      ? '#ff3366'
+                      : hasPendingTasks
                       ? '#ffaa00'
-                      : 'var(--border-sub)'
+                      : 'rgba(0, 243, 255, 0.2)'
                   }`,
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '8px',
-                  textAlign: 'center',
-                  boxShadow: isCurrentRoom ? '0 0 15px rgba(0, 243, 255, 0.5)' : undefined,
-                  animation: isSabotaged ? 'alarmFlash 1.5s infinite' : undefined,
+                  justifyContent: 'space-between',
+                  padding: '9px 11px',
+                  boxShadow: isCurrentRoom
+                    ? '0 0 20px rgba(0, 243, 255, 0.35), inset 0 0 12px rgba(0, 243, 255, 0.1)'
+                    : isSabotaged
+                    ? '0 0 20px rgba(255, 51, 102, 0.4)'
+                    : '0 4px 12px rgba(0, 0, 0, 0.5)',
+                  animation: isSabotaged ? 'alarmFlash 1.4s infinite' : undefined,
+                  transition: 'all 0.2s ease',
+                  zIndex: isCurrentRoom ? 10 : 2,
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: 'var(--font-header)',
-                    fontSize: '0.8rem',
-                    color: isCurrentRoom ? '#00f3ff' : '#e2f1f8',
-                    fontWeight: 700,
-                  }}
-                >
-                  {data.label}
-                </span>
+                {/* Sector Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.65rem',
+                      color: isCurrentRoom ? 'var(--accent-cyan)' : 'var(--text-muted)',
+                      letterSpacing: '0.06em',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {data.code}
+                  </span>
 
-                {/* Status Badges in Room */}
-                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
                   {isCurrentRoom && (
-                    <span
+                    <div
                       style={{
-                        backgroundColor: '#00f3ff',
-                        color: '#000',
-                        fontSize: '0.65rem',
-                        fontWeight: 900,
-                        padding: '1px 6px',
-                        borderRadius: '2px',
-                        fontFamily: 'var(--font-mono)',
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      YOU
-                    </span>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          width: '18px',
+                          height: '18px',
+                          borderRadius: '50%',
+                          border: '1px solid var(--accent-cyan)',
+                          animation: 'sonarPulse 1.8s infinite',
+                        }}
+                      />
+                      <span
+                        style={{
+                          backgroundColor: 'var(--accent-cyan)',
+                          color: '#000000',
+                          fontSize: '0.6rem',
+                          fontWeight: 900,
+                          padding: '1px 5px',
+                          borderRadius: '2px',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                      >
+                        YOU
+                      </span>
+                    </div>
                   )}
+                </div>
 
-                  {hasIncompleteTasks && (
+                {/* Sector Name */}
+                <div>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-header)',
+                      fontSize: '0.82rem',
+                      color: isCurrentRoom ? '#ffffff' : '#edf4fa',
+                      fontWeight: 700,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {data.name}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.65rem',
+                      color: 'var(--text-muted)',
+                      marginTop: '1px',
+                    }}
+                  >
+                    {data.subtitle}
+                  </div>
+                </div>
+
+                {/* Status Badges */}
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  {hasPendingTasks && (
                     <span
                       style={{
-                        backgroundColor: '#ffaa00',
-                        color: '#000',
-                        fontSize: '0.65rem',
-                        fontWeight: 900,
+                        backgroundColor: 'rgba(255, 170, 0, 0.18)',
+                        border: '1px solid rgba(255, 170, 0, 0.6)',
+                        color: '#ffaa00',
+                        fontSize: '0.62rem',
+                        fontWeight: 700,
                         padding: '1px 6px',
                         borderRadius: '2px',
                         fontFamily: 'var(--font-mono)',
                       }}
                     >
-                      TASK
+                      TASK ({pendingTasks.length})
                     </span>
                   )}
 
                   {isSabotaged && (
                     <span
                       style={{
-                        backgroundColor: '#ff3864',
-                        color: '#fff',
-                        fontSize: '0.65rem',
+                        backgroundColor: '#ff3366',
+                        color: '#ffffff',
+                        fontSize: '0.62rem',
                         fontWeight: 900,
                         padding: '1px 6px',
                         borderRadius: '2px',
                         fontFamily: 'var(--font-mono)',
+                        animation: 'pulse 1s infinite alternate',
                       }}
                     >
-                      ALARM
+                      CRITICAL ALARM
                     </span>
                   )}
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Studio Diagnostics Footer */}
+        <div
+          style={{
+            marginTop: '14px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.75rem',
+            color: 'var(--text-secondary)',
+            borderTop: '1px solid var(--border-subtle)',
+            paddingTop: '10px',
+          }}
+        >
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <ShieldCheck size={14} color="#00e676" />
+              <span>HULL INTEGRITY: 100% NOMINAL</span>
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Activity size={14} color="var(--accent-cyan)" />
+              <span>STATION ATMOSPHERE: 21% O2 // 78% N2</span>
+            </span>
+          </div>
+
+          <div style={{ color: 'var(--text-muted)' }}>
+            PRESS <kbd style={{ color: 'var(--accent-cyan)', background: 'rgba(0, 243, 255, 0.1)', padding: '1px 5px', borderRadius: '2px' }}>M</kbd> TO TOGGLE
+          </div>
         </div>
       </div>
     </div>

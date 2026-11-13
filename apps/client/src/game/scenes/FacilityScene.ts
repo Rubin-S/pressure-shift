@@ -30,8 +30,10 @@ export class FacilityScene extends Phaser.Scene {
   // Atmosphere & Lighting
   private alarmOverlay!: Phaser.GameObjects.Rectangle;
   private alarmTween?: Phaser.Tweens.Tween;
+  private visionVignette!: Phaser.GameObjects.Image;
   private bubbleEmitter!: Phaser.GameObjects.Particles.ParticleEmitter;
   private steamEmitter!: Phaser.GameObjects.Particles.ParticleEmitter;
+  private sporeEmitter!: Phaser.GameObjects.Particles.ParticleEmitter;
 
   // Active interaction tracking
   private nearestInteractable: InteractableInfo | null = null;
@@ -57,7 +59,7 @@ export class FacilityScene extends Phaser.Scene {
     // 2. Spawn Interactive Task Stations, Vents, and Emergency Button
     this.createInteractableStations();
 
-    // 3. Setup Particles (Bubbles, Steam)
+    // 3. Setup Particles (Bubbles, Steam, Algae Spores)
     this.createParticles();
 
     // 4. Setup Local Player & Camera
@@ -101,6 +103,8 @@ export class FacilityScene extends Phaser.Scene {
         tileType = 'tile_floor_hazard';
       } else if (roomId === 'hydroponics' || roomId === 'medical_bay') {
         tileType = 'tile_floor_hex';
+      } else if (roomId === 'observation_gallery') {
+        tileType = 'tile_floor_rubber';
       }
 
       // Tiled floor fill
@@ -114,12 +118,12 @@ export class FacilityScene extends Phaser.Scene {
         }
       }
 
-      // Room border highlight
-      floorGraphics.lineStyle(2, 0x00f3ff, 0.4);
+      // Precision room perimeter border highlight
+      floorGraphics.lineStyle(1.5, 0x00f3ff, 0.35);
       floorGraphics.strokeRect(x, y, width, height);
     }
 
-    // Connect Corridors (width: 100px)
+    // Connect Corridors (width: 100px) with glowing power conduits
     // Horizontal Corridors
     // Row 1: Docking Cradle (x:600) -> Sonar (x:950) at y:250-350
     this.renderCorridor(600, 250, 350, 100, true);
@@ -154,10 +158,23 @@ export class FacilityScene extends Phaser.Scene {
   }
 
   private renderCorridor(x: number, y: number, w: number, h: number, horizontal: boolean): void {
-    const tile = horizontal ? 'tile_floor_grate' : 'tile_floor_plate';
+    const tile = horizontal ? 'tile_floor_plate' : 'tile_floor_rubber';
     for (let tx = x; tx < x + w; tx += 32) {
       for (let ty = y; ty < y + h; ty += 32) {
         this.add.image(tx + 16, ty + 16, tile).setDepth(-50);
+      }
+    }
+
+    // Glowing cyan power conduit running along corridor center line
+    if (horizontal) {
+      const midY = y + 48;
+      for (let tx = x; tx < x + w; tx += 32) {
+        this.add.image(tx + 16, midY, 'tile_conduit_h').setDepth(-48);
+      }
+    } else {
+      const midX = x + 48;
+      for (let ty = y; ty < y + h; ty += 32) {
+        this.add.image(midX, ty + 16, 'tile_conduit_v').setDepth(-48);
       }
     }
   }
@@ -169,9 +186,8 @@ export class FacilityScene extends Phaser.Scene {
   private createBulkheadWalls(): void {
     this.wallsGroup = this.physics.add.staticGroup();
 
-    // Helper to add a collision wall segment
     const addWall = (x: number, y: number, w: number, h: number) => {
-      // Create visual bulkhead tiles
+      // Visual bulkhead tiles
       for (let tx = x; tx < x + w; tx += 32) {
         for (let ty = y; ty < y + h; ty += 32) {
           this.add.image(tx + 16, ty + 16, 'tile_wall_bulkhead').setDepth(10);
@@ -184,53 +200,46 @@ export class FacilityScene extends Phaser.Scene {
       wallBody.setVisible(false);
     };
 
-    // Helper to add corridor walls (prevent players from walking off corridors into the deep sea)
-    // Row 1 Horizontal Corridors Walls
-    addWall(600, 230, 350, 20); // Top wall Docking->Sonar
-    addWall(600, 350, 350, 20); // Bottom wall Docking->Sonar
-    addWall(1450, 230, 350, 20); // Top wall Sonar->Hydro
-    addWall(1450, 350, 350, 20); // Bottom wall Sonar->Hydro
+    // Horizontal Corridors Walls
+    addWall(600, 230, 350, 20);
+    addWall(600, 350, 350, 20);
+    addWall(1450, 230, 350, 20);
+    addWall(1450, 350, 350, 20);
 
-    // Row 2 Horizontal Corridors Walls
-    addWall(600, 830, 300, 20); // Top wall Pressure->Central
-    addWall(600, 950, 300, 20); // Bottom wall Pressure->Central
-    addWall(1500, 830, 300, 20); // Top wall Central->Obs
-    addWall(1500, 950, 300, 20); // Bottom wall Central->Obs
+    addWall(600, 830, 300, 20);
+    addWall(600, 950, 300, 20);
+    addWall(1500, 830, 300, 20);
+    addWall(1500, 950, 300, 20);
 
-    // Row 3 Horizontal Corridors Walls
-    addWall(600, 1430, 350, 20); // Top wall Thermal->Comms
-    addWall(600, 1550, 350, 20); // Bottom wall Thermal->Comms
-    addWall(1450, 1430, 350, 20); // Top wall Comms->Med
-    addWall(1450, 1550, 350, 20); // Bottom wall Comms->Med
+    addWall(600, 1430, 350, 20);
+    addWall(600, 1550, 350, 20);
+    addWall(1450, 1430, 350, 20);
+    addWall(1450, 1550, 350, 20);
 
     // Vertical Corridors Walls
-    // Col 1 Vertical Corridors Walls
-    addWall(280, 500, 20, 200); // Left wall Docking->Pressure
-    addWall(400, 500, 20, 200); // Right wall Docking->Pressure
-    addWall(280, 1100, 20, 200); // Left wall Pressure->Thermal
-    addWall(400, 1100, 20, 200); // Right wall Pressure->Thermal
+    addWall(280, 500, 20, 200);
+    addWall(400, 500, 20, 200);
+    addWall(280, 1100, 20, 200);
+    addWall(400, 1100, 20, 200);
 
-    // Col 2 Vertical Corridors Walls
-    addWall(1130, 500, 20, 200); // Left wall Sonar->Central
-    addWall(1250, 500, 20, 200); // Right wall Sonar->Central
-    addWall(1130, 1100, 20, 200); // Left wall Central->Comms
-    addWall(1250, 1100, 20, 200); // Right wall Central->Comms
+    addWall(1130, 500, 20, 200);
+    addWall(1250, 500, 20, 200);
+    addWall(1130, 1100, 20, 200);
+    addWall(1250, 1100, 20, 200);
 
-    // Col 3 Vertical Corridors Walls
-    addWall(1980, 500, 20, 200); // Left wall Hydro->Obs
-    addWall(2100, 500, 20, 200); // Right wall Hydro->Obs
-    addWall(1980, 1100, 20, 200); // Left wall Obs->Med
-    addWall(2100, 1100, 20, 200); // Right wall Obs->Med
+    addWall(1980, 500, 20, 200);
+    addWall(2100, 500, 20, 200);
+    addWall(1980, 1100, 20, 200);
+    addWall(2100, 1100, 20, 200);
 
-    // Perimeter and Room Exterior Walls with door openings for corridors:
+    // Perimeter and Room Walls with doorway gaps
     for (const [roomId, room] of Object.entries(FACILITY_ROOMS)) {
       const { x, y, width, height } = room.bounds;
 
       // Top Wall
       if (roomId === 'docking_cradle' || roomId === 'sonar_control' || roomId === 'hydroponics') {
-        addWall(x, y - 20, width, 20); // Solid top wall along facility top boundary
+        addWall(x, y - 20, width, 20);
       } else {
-        // Vertical corridor opens in top wall
         const doorX = (roomId === 'pressure_lab' || roomId === 'thermal_plant') ? 300 :
                       (roomId === 'central_junction' || roomId === 'communications') ? 1150 : 2000;
         addWall(x, y - 20, doorX - x, 20);
@@ -239,7 +248,7 @@ export class FacilityScene extends Phaser.Scene {
 
       // Bottom Wall
       if (roomId === 'thermal_plant' || roomId === 'communications' || roomId === 'medical_bay') {
-        addWall(x, y + height, width, 20); // Solid bottom wall along facility bottom boundary
+        addWall(x, y + height, width, 20);
       } else {
         const doorX = (roomId === 'docking_cradle' || roomId === 'pressure_lab') ? 300 :
                       (roomId === 'sonar_control' || roomId === 'central_junction') ? 1150 : 2000;
@@ -249,7 +258,7 @@ export class FacilityScene extends Phaser.Scene {
 
       // Left Wall
       if (roomId === 'docking_cradle' || roomId === 'pressure_lab' || roomId === 'thermal_plant') {
-        addWall(x - 20, y, 20, height); // Solid left boundary
+        addWall(x - 20, y, 20, height);
       } else {
         const doorY = (roomId === 'sonar_control' || roomId === 'hydroponics') ? 250 :
                       (roomId === 'central_junction' || roomId === 'observation_gallery') ? 850 : 1450;
@@ -259,7 +268,7 @@ export class FacilityScene extends Phaser.Scene {
 
       // Right Wall
       if (roomId === 'hydroponics' || roomId === 'observation_gallery' || roomId === 'medical_bay') {
-        addWall(x + width, y, 20, height); // Solid right boundary
+        addWall(x + width, y, 20, height);
       } else {
         const doorY = (roomId === 'docking_cradle' || roomId === 'sonar_control') ? 250 :
                       (roomId === 'pressure_lab' || roomId === 'central_junction') ? 850 : 1450;
@@ -270,54 +279,93 @@ export class FacilityScene extends Phaser.Scene {
   }
 
   // ----------------------------------------------------
-  // Room Labels & Decals
+  // Room Floor Stencils & Architecture Labels
   // ----------------------------------------------------
 
   private createRoomLabels(): void {
-    for (const [, room] of Object.entries(FACILITY_ROOMS)) {
-      const { x, y, width } = room.bounds;
+    const roomSectorLabels: Record<string, { sector: string; telemetry: string }> = {
+      central_junction: { sector: 'SEC-01 // CENTRAL DISPATCH', telemetry: 'STATION HUB // 1.0 ATM' },
+      docking_cradle: { sector: 'SEC-02 // DOCKING CRADLE', telemetry: 'SUBMERSIBLE AIRLOCK // DECK-A' },
+      sonar_control: { sector: 'SEC-03 // SONAR TELEMETRY', telemetry: 'HYDROPHONE ARRAY // 440 HZ' },
+      hydroponics: { sector: 'SEC-04 // HYDROPONICS LAB', telemetry: 'SPIRULINA CULTURE // O2 GEN' },
+      pressure_lab: { sector: 'SEC-05 // PRESSURE LAB', telemetry: 'EQUALIZATION CHAMBER // 80 PSI' },
+      observation_gallery: { sector: 'SEC-06 // OBSERVATION DOME', telemetry: 'TRENCH VIEWPORT // -8,420M' },
+      thermal_plant: { sector: 'SEC-07 // GEOTHERMAL PLANT', telemetry: 'CORE TURBINE // 480°C' },
+      communications: { sector: 'SEC-08 // COMMUNICATIONS', telemetry: 'ULF TRANSCEIVER // BUOY-7' },
+      medical_bay: { sector: 'SEC-09 // MEDICAL BAY', telemetry: 'BIO-DECONTAM // STASIS PODS' },
+    };
 
-      const label = this.add.text(x + width / 2, y + 24, room.name.toUpperCase(), {
+    for (const [roomId, room] of Object.entries(FACILITY_ROOMS)) {
+      const { x, y, width } = room.bounds;
+      const meta = roomSectorLabels[roomId];
+
+      // Clean futuristic sector title
+      const title = this.add.text(x + width / 2, y + 26, meta ? meta.sector : room.name.toUpperCase(), {
         fontFamily: 'monospace',
-        fontSize: '14px',
-        color: '#00d2ff',
-        stroke: '#002233',
+        fontSize: '13px',
+        color: '#00f3ff',
+        stroke: '#001a2c',
         strokeThickness: 3,
         align: 'center',
       });
-      label.setOrigin(0.5, 0.5);
-      label.setAlpha(0.65);
-      label.setDepth(-40);
+      title.setOrigin(0.5, 0.5);
+      title.setAlpha(0.7);
+      title.setDepth(-40);
+
+      // Sub-label telemetry
+      if (meta) {
+        const sub = this.add.text(x + width / 2, y + 42, meta.telemetry, {
+          fontFamily: 'monospace',
+          fontSize: '9px',
+          color: '#5b82a6',
+          align: 'center',
+        });
+        sub.setOrigin(0.5, 0.5);
+        sub.setAlpha(0.65);
+        sub.setDepth(-40);
+      }
     }
   }
 
   // ----------------------------------------------------
-  // Decorative Atmosphere Props & Viewports
+  // Distinct Sector Decorative Props & Viewports
   // ----------------------------------------------------
 
   private createDecorativeProps(): void {
     // 1. Panoramic deep ocean viewports in Observation Gallery
     const obs = FACILITY_ROOMS.observation_gallery.bounds;
-    this.add.image(obs.x + obs.width / 2, obs.y + 36, 'viewport_window').setDepth(12);
+    this.add.image(obs.x + obs.width / 2, obs.y + 40, 'viewport_window').setDepth(12);
 
-    // 2. Viewports in Sonar Control and Docking Cradle
+    // 2. Viewport in Sonar Control
     const sonar = FACILITY_ROOMS.sonar_control.bounds;
-    this.add.image(sonar.x + sonar.width / 2, sonar.y + 36, 'viewport_window').setDepth(12);
+    this.add.image(sonar.x + sonar.width / 2, sonar.y + 40, 'viewport_window').setDepth(12);
+    // Server blade racks in Sonar Control
+    this.add.image(sonar.x + 80, sonar.y + 120, 'prop_server_rack').setDepth(5);
 
-    // 3. Bioluminescent Algae vats in Hydroponics
+    // 3. Docking Cradle clamp & gantry
+    const dock = FACILITY_ROOMS.docking_cradle.bounds;
+    this.add.image(dock.x + 120, dock.y + 140, 'prop_docking_clamp').setDepth(5);
+    this.add.image(dock.x + dock.width - 120, dock.y + 140, 'prop_docking_clamp').setDepth(5);
+
+    // 4. Bioluminescent Spirulina Algae columns in Hydroponics
     const hydro = FACILITY_ROOMS.hydroponics.bounds;
-    this.add.image(hydro.x + 80, hydro.y + 120, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 160, hydro.y + 120, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 340, hydro.y + 120, 'prop_algae_vat').setDepth(5);
-    this.add.image(hydro.x + 420, hydro.y + 120, 'prop_algae_vat').setDepth(5);
+    this.add.image(hydro.x + 80, hydro.y + 130, 'prop_algae_vat').setDepth(5);
+    this.add.image(hydro.x + 160, hydro.y + 130, 'prop_algae_vat').setDepth(5);
+    this.add.image(hydro.x + 340, hydro.y + 130, 'prop_algae_vat').setDepth(5);
+    this.add.image(hydro.x + 420, hydro.y + 130, 'prop_algae_vat').setDepth(5);
 
-    // 4. Medical beds in Medical Bay
+    // 5. Server Blade racks in Communications
+    const comms = FACILITY_ROOMS.communications.bounds;
+    this.add.image(comms.x + 100, comms.y + 130, 'prop_server_rack').setDepth(5);
+    this.add.image(comms.x + 400, comms.y + 130, 'prop_server_rack').setDepth(5);
+
+    // 6. Medical beds in Medical Bay
     const med = FACILITY_ROOMS.medical_bay.bounds;
-    this.add.image(med.x + 100, med.y + 120, 'prop_med_bed').setDepth(5);
-    this.add.image(med.x + 250, med.y + 120, 'prop_med_bed').setDepth(5);
-    this.add.image(med.x + 400, med.y + 120, 'prop_med_bed').setDepth(5);
+    this.add.image(med.x + 100, med.y + 130, 'prop_med_bed').setDepth(5);
+    this.add.image(med.x + 250, med.y + 130, 'prop_med_bed').setDepth(5);
+    this.add.image(med.x + 400, med.y + 130, 'prop_med_bed').setDepth(5);
 
-    // 5. Emergency Siren Beacons on Bulkheads
+    // 7. Emergency Siren Beacons on Bulkheads
     for (const [, room] of Object.entries(FACILITY_ROOMS)) {
       this.add.image(room.bounds.x + 30, room.bounds.y + 30, 'prop_siren_beacon').setDepth(15);
       this.add.image(room.bounds.x + room.bounds.width - 30, room.bounds.y + 30, 'prop_siren_beacon').setDepth(15);
@@ -432,7 +480,7 @@ export class FacilityScene extends Phaser.Scene {
   }
 
   // ----------------------------------------------------
-  // Particles (Bubbles, Steam)
+  // Atmospheric Particles (Bubbles, Steam, Spores)
   // ----------------------------------------------------
 
   private createParticles(): void {
@@ -442,7 +490,7 @@ export class FacilityScene extends Phaser.Scene {
       y: { min: 200, max: 1700 },
       speedY: { min: -20, max: -45 },
       speedX: { min: -5, max: 5 },
-      scale: { start: 0.4, end: 0.9 },
+      scale: { start: 0.35, end: 0.8 },
       alpha: { start: 0.6, end: 0 },
       lifespan: 4000,
       frequency: 250,
@@ -456,12 +504,25 @@ export class FacilityScene extends Phaser.Scene {
       y: 1400,
       speedY: { min: -30, max: -60 },
       speedX: { min: -10, max: 10 },
-      scale: { start: 0.5, end: 1.2 },
-      alpha: { start: 0.5, end: 0 },
+      scale: { start: 0.4, end: 1.1 },
+      alpha: { start: 0.45, end: 0 },
       lifespan: 2500,
       frequency: 400,
     });
     this.steamEmitter.setDepth(25);
+
+    // Glowing emerald spores in Hydroponics
+    this.sporeEmitter = this.add.particles(0, 0, 'particle_spore', {
+      x: { min: 1820, max: 2280 },
+      y: { min: 120, max: 480 },
+      speedY: { min: -10, max: 10 },
+      speedX: { min: -10, max: 10 },
+      scale: { start: 0.5, end: 1.0 },
+      alpha: { start: 0.7, end: 0 },
+      lifespan: 3000,
+      frequency: 350,
+    });
+    this.sporeEmitter.setDepth(25);
   }
 
   // ----------------------------------------------------
@@ -469,7 +530,6 @@ export class FacilityScene extends Phaser.Scene {
   // ----------------------------------------------------
 
   private setupLocalPlayer(): void {
-    // Default initial mock data if not set yet by UI
     const defaultLocalData: PlayerPublicView = (this.bridge.localPlayer as PlayerPublicView) || {
       id: 'local_player',
       name: 'Operator',
@@ -495,7 +555,7 @@ export class FacilityScene extends Phaser.Scene {
     );
     this.localPlayer.setDepth(50);
 
-    // Setup collision with all facility walls!
+    // Setup collision with all facility walls
     this.physics.add.collider(this.localPlayer, this.wallsGroup);
 
     // Camera follow local player smoothly
@@ -505,10 +565,16 @@ export class FacilityScene extends Phaser.Scene {
   }
 
   // ----------------------------------------------------
-  // Ambient Lighting & Emergency Alarms
+  // Soft Radial Vision & Emergency Siren Lighting
   // ----------------------------------------------------
 
   private setupLightingAndAlarms(width: number, height: number): void {
+    // Soft radial vision vignette following local player
+    this.visionVignette = this.add.image(1200, 900, 'vision_mask');
+    this.visionVignette.setScale(3.5);
+    this.visionVignette.setAlpha(0.45);
+    this.visionVignette.setDepth(150);
+
     // Emergency alarm amber/red pulsing overlay
     this.alarmOverlay = this.add.rectangle(width / 2, height / 2, width, height, 0xff1744, 0.0);
     this.alarmOverlay.setDepth(200);
@@ -549,7 +615,12 @@ export class FacilityScene extends Phaser.Scene {
     // 1. Update Local Player
     this.localPlayer.update(time, delta);
 
-    // 2. Sync Local Player state with bridge changes (e.g. role, alive/dead, speed)
+    // 2. Smoothly follow local player with vision vignette
+    if (this.visionVignette) {
+      this.visionVignette.setPosition(this.localPlayer.x, this.localPlayer.y);
+    }
+
+    // 3. Sync Local Player state with bridge changes
     if (this.bridge.localPlayer) {
       if (this.localPlayer.playerData.isAlive !== this.bridge.localPlayer.isAlive) {
         this.localPlayer.setAliveState(this.bridge.localPlayer.isAlive);
@@ -560,21 +631,21 @@ export class FacilityScene extends Phaser.Scene {
       }
     }
 
-    // 3. Sync Remote Players
+    // 4. Sync Remote Players
     this.syncRemotePlayers(time, delta);
 
-    // 4. Sync Dead Bodies
+    // 5. Sync Dead Bodies
     this.syncDeadBodies();
 
-    // 5. Sync Door Lockdowns
+    // 6. Sync Door Lockdowns
     this.syncDoorLockdowns();
 
-    // 6. Sync Emergency Alarm state
+    // 7. Sync Emergency Alarm state
     if (this.bridge.isEmergencyAlarmActive !== this.alarmOverlay.visible) {
       this.setEmergencyAlarm(this.bridge.isEmergencyAlarmActive);
     }
 
-    // 7. Check Proximity to Interactables & Kill Targets
+    // 8. Check Proximity to Interactables & Kill Targets
     this.checkProximities();
   }
 
@@ -585,7 +656,6 @@ export class FacilityScene extends Phaser.Scene {
   private syncRemotePlayers(time: number, delta: number): void {
     const bridgePlayers = this.bridge.remotePlayers;
 
-    // Add new remote players or update positions
     for (const [id, pData] of bridgePlayers.entries()) {
       let rPlayer = this.remotePlayers.get(id);
       if (!rPlayer) {
@@ -605,7 +675,6 @@ export class FacilityScene extends Phaser.Scene {
       rPlayer.update(time, delta);
     }
 
-    // Remove disconnected remote players
     for (const [id, rPlayer] of this.remotePlayers.entries()) {
       if (!bridgePlayers.has(id)) {
         rPlayer.destroy();
@@ -644,14 +713,12 @@ export class FacilityScene extends Phaser.Scene {
   private syncDoorLockdowns(): void {
     const lockedRooms = this.bridge.lockedDoors;
 
-    // Check newly locked rooms
     for (const roomId of lockedRooms) {
       if (!this.lockedDoorColliders.has(roomId)) {
         this.spawnLockedDoorsForRoom(roomId);
       }
     }
 
-    // Check unlocked rooms
     for (const [roomId, colliders] of this.lockedDoorColliders.entries()) {
       if (!lockedRooms.has(roomId)) {
         for (const c of colliders) {
@@ -675,7 +742,6 @@ export class FacilityScene extends Phaser.Scene {
     const colliders: Phaser.GameObjects.Rectangle[] = [];
     const sprites: Phaser.GameObjects.Sprite[] = [];
 
-    // Helper to spawn door barrier
     const addDoor = (x: number, y: number, w: number, h: number) => {
       const sp = this.add.sprite(x, y, 'tile_door_bulkhead').setDepth(15);
       sprites.push(sp);
@@ -687,7 +753,6 @@ export class FacilityScene extends Phaser.Scene {
       barrier.setVisible(false);
     };
 
-    // Spawn doors at the room's corridor entries
     const b = room.bounds;
     addDoor(b.x + b.width / 2, b.y, 64, 24);
     addDoor(b.x + b.width / 2, b.y + b.height, 64, 24);
@@ -733,12 +798,10 @@ export class FacilityScene extends Phaser.Scene {
 
     // 2. Check Interactive Consoles, Emergency Table, Sabotage Stations, and Vents
     for (const [id, station] of this.interactables.entries()) {
-      // Vents only usable by Disruptors
       if (station.config.type === 'vent' && (!isDisruptor || !isAlive)) {
         continue;
       }
 
-      // Ghosts cannot call emergency meeting
       if (station.config.type === 'emergency_button' && !isAlive) {
         continue;
       }

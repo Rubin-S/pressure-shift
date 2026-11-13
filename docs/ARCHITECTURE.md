@@ -88,18 +88,21 @@ stateDiagram-v2
 
 ## 4. World & Map Design: Hadal Station Nadir-7
 
-The facility layout consists of 8 interconnected underwater modules:
+The facility layout consists of 9 interconnected underwater modules centered around the command hub:
 
-| Sector ID | Room Name | Interactive Consoles | Primary Systems |
-| :--- | :--- | :--- | :--- |
-| `docking_cradle` | Submersible Dock & Airflow | Airlock Control, Ballast Valve | Spawn point, emergency button |
-| `sonar_control` | Deep Acoustic Array | Sonar Calibrator, Hydrophone Grid | Active scanning, navigation |
-| `hydroponics` | High-Pressure Bio-Dome | Bio Sample Classifier, Algae Feeder | Food production, oxygen scrubbers |
-| `pressure_lab` | Hydrostatic Testing Chamber | Pressure Valve Regulator | Hull stress diagnostics |
-| `thermal_plant` | Geothermal Vent Generator | Thermal Grid Router, Core Injector | Power generation |
-| `communications` | Trans-Oceanic Relay | Sub-wave Frequency Tuner | External contact, CCTV |
-| `observation_gallery` | Abyssal Trench Overlook | Optical Sensor Alignment Dial | Trench exploration |
-| `medical_bay` | Hyperbaric Decompression Unit | Vital Scanner, Filtration Sieve | Emergency treatment, quarantine |
+| Sector ID | Sector Code | Room Name | Interactive Consoles | Primary Systems |
+| :--- | :--- | :--- | :--- | :--- |
+| `central_junction` | `CMD-00` | Central Dispatch | Command Table, Floor Compass | Core routing hub, domed emergency alert |
+| `docking_cradle` | `SEC-01` | Submersible Docking Bay | Airlock Control, Ballast Valve | Submersible clamps, spawn staging |
+| `sonar_control` | `SEC-02` | Deep Acoustic Telemetry | Sonar Calibrator, Hydrophone Grid | Active acoustic sweep, server telemetry |
+| `hydroponics` | `SEC-03` | Hadal Bio-Dome Lab | Bio Sample Classifier, Algae Feeder | Photobioreactors, oxygen scrubbers |
+| `pressure_lab` | `SEC-04` | Hydrostatic Testing Rig | Pressure Valve Regulator | Hyperbaric equalization, hull diagnostics |
+| `thermal_plant` | `SEC-05` | Geothermal Vent Generator | Thermal Grid Router, Core Injector | Heat exchangers, volcanic energy |
+| `observation_gallery`| `SEC-06`| Abyssal Trench Overlook | Optical Sensor Alignment Dial | Panoramic quartz viewport, trench search |
+| `communications` | `SEC-07` | Trans-Oceanic Relay | Sub-wave Frequency Tuner | Holographic dish, blade arrays |
+| `medical_bay` | `SEC-08` | Hyperbaric Cryo-Lab | Vital Scanner, Filtration Sieve | Sterile scanner beds, bio-incubators |
+
+Corridors between sectors feature active cyan power conduits (`tile_conduit_h`, `tile_conduit_v`), precision floor demarcation hazard lines, and floor stencil signage.
 
 ---
 
@@ -147,10 +150,14 @@ The facility layout consists of 8 interconnected underwater modules:
 ## 6. Client Architecture & Rendering Pipeline
 
 1. **Phaser 3 Canvas Layer**:
-   - Renders 60 FPS station tiles, dynamic water light refraction, player sprites with underwater swimming physics, collision boundaries, and visibility field-of-view (fog of war).
+   - Renders 60 FPS studio-grade procedural textures: beveled titanium bulkheads with horizontal cyan LED strips, modular composite deck plates, brushed stainless drainage grates, and polished rubberized corridors.
+   - Smooth, non-creepy radial vision mask (`vision_mask`) centered on the active diver for atmospheric deep-sea exploration without harsh visual clipping.
+   - Distinct high-fidelity props for all 9 sectors (e.g. 88x88 octagonal command table, illuminated floor compass, spirulina bioreactors with rising microbubbles, panoramic quartz viewports with abyssal caustics).
+   - Modern sci-fi diving suits with curved cyan glass visors, chestplate oxygen telemetry LEDs, compact rebreathers, and smooth 4-directional walk cycles.
    - Coordinates with React via a decoupled Event Bus (`EventBus.ts`).
 2. **React 18 Overlay & HUD**:
-   - Manages top-level game state, UI dialogs, interactive mini-game screens, meeting discussion UI, and audio controls.
+   - **Tactical Schematic Minimap** (`Minimap.tsx`): 9-sector architectural blueprint with sector codes (CMD-00, SEC-01..SEC-08), interconnecting transit corridors, glowing power conduits, animated radar ping ring tracking local coordinates, and live station telemetry diagnostics (8,400m Depth, 100% Hull Integrity, 21% O2 / 78% N2 atmosphere).
+   - **Dark Obsidian Glassmorphism** (`theme.css`): Modern translucent panels, 1px hairline cyan borders, subtle inner rim highlights, refined CRT phosphor scanline filter with soft vignette, and precision action cluster buttons.
    - Zero DOM overhead during core traversal: React only renders the HUD overlay and modals.
 3. **Web Audio Synthesizer**:
    - Procedural sound synthesis using the Web Audio API: Sonar pulse pings, hydrophone hum, emergency sirens, diving suit breathing ambience, and button clicks. Zero external asset dependencies.

@@ -42,7 +42,7 @@ Runs both the authoritative backend (`apps/server`) and the Vite client (`apps/c
 ```bash
 npm run dev
 ```
-- **Web Client**: [http://localhost:5173](http://localhost:5173)
+- **Web Client**: [http://localhost:3000](http://localhost:3000)
 - **Authoritative Game Server**: [http://localhost:3001](http://localhost:3001)
 
 ### 3. Build & Typecheck

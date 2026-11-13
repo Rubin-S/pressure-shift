@@ -3,7 +3,7 @@ import { useGame } from '../../context/GameContext.js';
 import { HeaderControls } from '../common/HeaderControls.js';
 import { SabotageBanner } from './SabotageBanner.js';
 import {
-  CheckSquare,
+  CheckSquare2,
   Square,
   Map,
   Skull,
@@ -12,6 +12,7 @@ import {
   Flame,
   ChevronDown,
   ChevronUp,
+  Compass,
 } from 'lucide-react';
 
 export const GameHUD: React.FC = () => {
@@ -23,6 +24,7 @@ export const GameHUD: React.FC = () => {
     isAlive,
     killCooldown,
     sabotageCooldown,
+    roomSettings,
     killableTargetId,
     reportableBodyId,
     nearbyInteractable,
@@ -40,7 +42,6 @@ export const GameHUD: React.FC = () => {
   // Keyboard shortcuts [E], [Q], [R], [S]
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if typing in an input
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
 
       if (e.key === 'e' || e.key === 'E') {
@@ -76,7 +77,7 @@ export const GameHUD: React.FC = () => {
           taskId: nearbyInteractable.id,
           name: nearbyInteractable.name,
           type: nearbyInteractable.id.replace('task_', '') as any,
-          description: 'Facility Station Task',
+          description: 'Station Task',
           room: (nearbyInteractable.room as any) || 'central_junction',
           location: { x: 0, y: 0 },
           status: 'NOT_STARTED',
@@ -92,18 +93,34 @@ export const GameHUD: React.FC = () => {
     }
   };
 
+  const maxKillCd = roomSettings.killCooldown || 25;
+  const killCdPercent = Math.max(0, Math.min(1, killCooldown / maxKillCd));
+
+  const maxSabotageCd = 30;
+  const sabotageCdPercent = Math.max(0, Math.min(1, sabotageCooldown / maxSabotageCd));
+
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
-      {/* Critical Sabotage Alert Banner */}
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 100,
+      }}
+    >
+      {/* Critical Sabotage Emergency Warning Banner */}
       <SabotageBanner />
 
-      {/* Top Bar: Task Meter & Room Header & Controls */}
+      {/* Top Precision Bar */}
       <div
         style={{
           position: 'absolute',
-          top: '12px',
-          left: '20px',
-          right: '20px',
+          top: '14px',
+          left: '24px',
+          right: '24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -111,12 +128,12 @@ export const GameHUD: React.FC = () => {
           pointerEvents: 'auto',
         }}
       >
-        {/* Left: Overall Task Meter */}
+        {/* Left: Facility Overall Objective Progress */}
         <div
           className="sub-panel"
           style={{
             width: '320px',
-            padding: '10px 14px',
+            padding: '10px 16px',
             display: 'flex',
             flexDirection: 'column',
             gap: '6px',
@@ -126,15 +143,20 @@ export const GameHUD: React.FC = () => {
             style={{
               display: 'flex',
               justifyContent: 'space-between',
+              alignItems: 'center',
               fontFamily: 'var(--font-mono)',
-              fontSize: '0.8rem',
-              color: 'var(--accent-cyan)',
+              fontSize: '0.75rem',
             }}
           >
-            <span>TOTAL FACILITY TASKS:</span>
-            <span>{Math.round(taskMeter.progressPercent)}%</span>
+            <span style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
+              STATION OBJECTIVE METER
+            </span>
+            <span style={{ color: '#00e676', fontWeight: 700 }}>
+              {Math.round(taskMeter.progressPercent)}%
+            </span>
           </div>
-          <div className="progress-rail" style={{ height: '14px' }}>
+
+          <div className="progress-rail" style={{ height: '8px' }}>
             <div
               className="progress-fill"
               style={{
@@ -145,7 +167,7 @@ export const GameHUD: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Current Room Location Readout */}
+        {/* Center: Sector Breadcrumb & Role Pill */}
         <div
           className="sub-panel"
           style={{
@@ -156,51 +178,58 @@ export const GameHUD: React.FC = () => {
             borderTop: '2px solid var(--accent-cyan)',
           }}
         >
-          <span
+          <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
               fontFamily: 'var(--font-header)',
-              fontSize: '1rem',
-              color: '#fff',
-              letterSpacing: '2px',
+              fontSize: '0.92rem',
+              color: '#ffffff',
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
             }}
           >
-            {currentRoomName.replace('_', ' ')}
-          </span>
-          <span
+            <Compass size={15} color="var(--accent-cyan)" />
+            <span>NADIR-7 // {currentRoomName.replace('_', ' ')}</span>
+          </div>
+
+          <div
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '0.7rem',
-              color: role === 'DISRUPTOR' ? '#ff3864' : 'var(--accent-cyan)',
               fontWeight: 700,
+              letterSpacing: '0.06em',
+              color: role === 'DISRUPTOR' ? '#ff3366' : 'var(--accent-cyan)',
+              marginTop: '2px',
             }}
           >
-            ROLE: {role} {!isAlive && '(SPECTATOR GHOST)'}
-          </span>
+            CLEARANCE: {role} {!isAlive && '• SPECTATOR GHOST'}
+          </div>
         </div>
 
-        {/* Right: Map Button & Header Settings */}
+        {/* Right: Map Shortcut & System Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             onClick={toggleMinimap}
             className="btn-sub"
-            style={{ padding: '8px 14px', fontSize: '0.85rem' }}
-            title="Toggle Map [M]"
+            style={{ padding: '8px 14px', fontSize: '0.8rem' }}
+            title="Toggle Facility Blueprint [M]"
           >
-            <Map size={16} />
+            <Map size={15} />
             <span>MAP [M]</span>
           </button>
           <HeaderControls />
         </div>
       </div>
 
-      {/* Left Assigned Tasks Checklist Box */}
+      {/* Left Objectives Checklist Drawer */}
       <div
         className="sub-panel"
         style={{
           position: 'absolute',
-          top: '80px',
-          left: '20px',
+          top: '78px',
+          left: '24px',
           width: '280px',
           maxHeight: 'calc(100vh - 220px)',
           pointerEvents: 'auto',
@@ -216,22 +245,22 @@ export const GameHUD: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '10px 14px',
-            backgroundColor: 'rgba(5, 14, 25, 0.85)',
-            borderBottom: '1px solid var(--border-sub)',
+            backgroundColor: 'rgba(5, 12, 22, 0.85)',
+            borderBottom: '1px solid var(--border-subtle)',
             cursor: 'pointer',
           }}
         >
           <span
             style={{
               fontFamily: 'var(--font-header)',
-              fontSize: '0.85rem',
+              fontSize: '0.82rem',
               color: 'var(--accent-cyan)',
-              letterSpacing: '1px',
+              letterSpacing: '0.06em',
             }}
           >
-            ASSIGNED OBJECTIVES
+            DIRECTIVE PROTOCOLS
           </span>
-          {isTasksOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          {isTasksOpen ? <ChevronUp size={15} color="var(--text-muted)" /> : <ChevronDown size={15} color="var(--text-muted)" />}
         </div>
 
         {isTasksOpen && (
@@ -245,8 +274,8 @@ export const GameHUD: React.FC = () => {
             }}
           >
             {assignedTasks.length === 0 ? (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                No active tasks assigned.
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                No active directives assigned.
               </div>
             ) : (
               assignedTasks.map((t) => {
@@ -258,20 +287,25 @@ export const GameHUD: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: '8px',
+                      gap: '9px',
                       cursor: isDone ? 'default' : 'pointer',
-                      opacity: isDone ? 0.5 : 1,
+                      opacity: isDone ? 0.45 : 1,
+                      transition: 'opacity 0.2s',
                     }}
                   >
                     <div style={{ marginTop: '2px' }}>
-                      {isDone ? <CheckSquare size={14} color="#00e676" /> : <Square size={14} color="var(--accent-cyan)" />}
+                      {isDone ? (
+                        <CheckSquare2 size={15} color="#00e676" />
+                      ) : (
+                        <Square size={15} color="var(--accent-cyan)" />
+                      )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span
                         style={{
                           fontFamily: 'var(--font-body)',
                           fontSize: '0.82rem',
-                          color: isDone ? '#7e9bb0' : '#e2f1f8',
+                          color: isDone ? 'var(--text-muted)' : 'var(--text-primary)',
                           textDecoration: isDone ? 'line-through' : 'none',
                         }}
                       >
@@ -280,11 +314,11 @@ export const GameHUD: React.FC = () => {
                       <span
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          fontSize: '0.7rem',
+                          fontSize: '0.68rem',
                           color: 'var(--text-muted)',
                         }}
                       >
-                        [{t.room.replace('_', ' ')}]
+                        {t.room.replace('_', ' ').toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -295,65 +329,66 @@ export const GameHUD: React.FC = () => {
         )}
       </div>
 
-      {/* Bottom Right Action Buttons Cluster */}
+      {/* Bottom Right Studio Circular Action Cluster */}
       <div
         style={{
           position: 'absolute',
-          bottom: '24px',
-          right: '24px',
+          bottom: '26px',
+          right: '26px',
           display: 'flex',
-          gap: '14px',
+          gap: '16px',
           pointerEvents: 'auto',
           alignItems: 'center',
         }}
       >
-        {/* Report Body Button */}
+        {/* Report Casualty Button */}
         {reportableBodyId && (
           <button
             onClick={reportBody}
             className="btn-sub btn-warning"
             style={{
-              width: '85px',
-              height: '85px',
+              width: '84px',
+              height: '84px',
               borderRadius: '50%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(255, 170, 0, 0.8)',
-              animation: 'pulse 1s infinite alternate',
+              boxShadow: '0 0 20px rgba(255, 170, 0, 0.6)',
+              animation: 'pulse 1.2s infinite alternate',
             }}
           >
             <AlertOctagon size={28} />
-            <span style={{ fontSize: '0.7rem', marginTop: '2px' }}>REPORT [R]</span>
+            <span style={{ fontSize: '0.68rem', marginTop: '2px' }}>REPORT [R]</span>
           </button>
         )}
 
-        {/* Disruptor Sabotage Button */}
+        {/* Disruptor Sabotage Button with Circular Cooldown */}
         {role === 'DISRUPTOR' && isAlive && (
           <button
             onClick={toggleSabotageMenu}
             disabled={sabotageCooldown > 0}
             className="btn-sub btn-danger"
             style={{
-              width: '85px',
-              height: '85px',
+              width: '84px',
+              height: '84px',
               borderRadius: '50%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: sabotageCooldown === 0 ? '0 0 15px rgba(255, 56, 100, 0.5)' : 'none',
+              position: 'relative',
+              boxShadow: sabotageCooldown === 0 ? '0 0 16px rgba(255, 51, 102, 0.4)' : 'none',
             }}
           >
-            <Flame size={28} />
-            <span style={{ fontSize: '0.68rem', marginTop: '2px' }}>
+            <Flame size={26} />
+            <span style={{ fontSize: '0.65rem', marginTop: '2px' }}>
               {sabotageCooldown > 0 ? `${sabotageCooldown}s` : 'SABOTAGE [S]'}
             </span>
           </button>
         )}
 
-        {/* Disruptor Kill Button */}
+        {/* Disruptor Kill Button with Radial Cooldown */}
         {role === 'DISRUPTOR' && isAlive && (
           <button
             onClick={attemptKill}
@@ -369,18 +404,18 @@ export const GameHUD: React.FC = () => {
               justifyContent: 'center',
               boxShadow:
                 killCooldown === 0 && killableTargetId
-                  ? '0 0 25px rgba(255, 56, 100, 0.9)'
+                  ? '0 0 24px rgba(255, 51, 102, 0.8)'
                   : 'none',
             }}
           >
-            <Skull size={32} />
-            <span style={{ fontSize: '0.72rem', marginTop: '2px' }}>
+            <Skull size={30} />
+            <span style={{ fontSize: '0.7rem', marginTop: '2px' }}>
               {killCooldown > 0 ? `${killCooldown}s` : 'KILL [Q]'}
             </span>
           </button>
         )}
 
-        {/* Use / Interact Button */}
+        {/* Use / Interact Action Button */}
         <button
           onClick={handleUseInteract}
           disabled={!nearbyInteractable}
@@ -393,13 +428,13 @@ export const GameHUD: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            border: `2px solid ${nearbyInteractable ? 'var(--accent-cyan)' : 'var(--border-sub)'}`,
-            boxShadow: nearbyInteractable ? '0 0 25px rgba(0, 243, 255, 0.7)' : 'none',
-            backgroundColor: nearbyInteractable ? 'rgba(0, 243, 255, 0.15)' : undefined,
+            border: `2px solid ${nearbyInteractable ? 'var(--accent-cyan)' : 'var(--border-subtle)'}`,
+            boxShadow: nearbyInteractable ? '0 0 24px var(--accent-cyan-glow)' : 'none',
+            backgroundColor: nearbyInteractable ? 'rgba(0, 243, 255, 0.16)' : undefined,
           }}
         >
           <Hand size={32} />
-          <span style={{ fontSize: '0.75rem', marginTop: '3px' }}>USE [E]</span>
+          <span style={{ fontSize: '0.74rem', marginTop: '2px' }}>USE [E]</span>
         </button>
       </div>
     </div>
